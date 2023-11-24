@@ -1,0 +1,301 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using Garage_Management.Models;
+using Garage_Management.DTO;
+using System.Net;
+
+namespace Garage_Management.Controllers
+{
+    public class VehiclesController : Controller
+    {
+        private readonly Garage_ManagementContext _context;
+
+        public VehiclesController(Garage_ManagementContext context)
+        {
+            _context = context;
+        }
+
+        // GET: Vehicles
+        public async Task<IActionResult> Index()
+        {
+            try
+            {
+                var sql = "SELECT * FROM Vehicles";
+                var Vehicles = await _context.Vehicles.FromSqlRaw(sql).ToListAsync();
+                var vehicleDTOs = Vehicles
+                    .Select(v => new VehicleDTO
+                    {
+                        VehicleId = v.VehicleId,
+                        Make = v.Make,
+                        Model = v.Model,
+                        Year = v.Year,
+                        Vin = v.Vin,
+                        Mileage = v.Mileage,
+                        LastServiceDate = v.LastServiceDate,
+                        OwnerId = v.OwnerId,
+                        Owner = new CustomerDTO
+                        {
+                            CustomerId = v.Owner.CustomerId,
+                            FirstName = v.Owner.FirstName,
+                            LastName = v.Owner.LastName,
+                            Email = v.Owner.Email,
+                            Phone = v.Owner.Phone,
+                            Address = v.Owner.Address
+                        }
+                    }).ToList();
+
+                return View(vehicleDTOs);
+            }
+            catch 
+            {
+                return View("Error");
+            }
+        }
+
+        // GET: Vehicles/Details/5
+        public async Task<IActionResult> Details(int? id)
+        {
+            try
+            {
+                if (id == null)
+                {
+                    return NotFound();
+                }
+
+                var vehicle = await _context.Vehicles
+                    .Include(v => v.Owner)
+                    .FirstOrDefaultAsync(m => m.VehicleId == id);
+                if (vehicle == null)
+                {
+                    return NotFound();
+                }
+
+                var vehicleDTO = new VehicleDTO
+                {
+                    VehicleId = vehicle.VehicleId,
+                    Make = vehicle.Make,
+                    Model = vehicle.Model,
+                    Year = vehicle.Year,
+                    Vin = vehicle.Vin,
+                    Mileage = vehicle.Mileage,
+                    LastServiceDate = vehicle.LastServiceDate,
+                    OwnerId = vehicle.OwnerId,
+                     Owner = new CustomerDTO
+                     {
+                         CustomerId = vehicle.Owner.CustomerId,
+                         FirstName = vehicle.Owner.FirstName,
+                         LastName = vehicle.Owner.LastName,
+                         Email = vehicle.Owner.Email,
+                         Phone = vehicle.Owner.Phone,
+                         Address = vehicle.Owner.Address
+                     }
+                };
+
+                return View(vehicleDTO);
+            }
+            catch
+            {
+                return View("Error");
+            }
+        }
+            
+
+        // GET: Vehicles/Create
+        public IActionResult Create()
+        {
+            ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstName");
+            return View();
+        }
+
+        // POST: Vehicles/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("VehicleId,Make,Model,Year,Vin,Mileage,LastServiceDate,OwnerId")] VehicleDTO vehicleDTO)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var maxVehicleId = await _context.Vehicles.MaxAsync(v => (int?)v.VehicleId) ?? 0;
+                    var newVehicleId = maxVehicleId + 1;
+                    var sql = $"INSERT INTO [Vehicles] (VehicleId,Make,Model,Year,Vin,Mileage,LastServiceDate,OwnerId) VALUES ({newVehicleId}, '{vehicleDTO.Make}','{vehicleDTO.Year}','{vehicleDTO.Vin}','{vehicleDTO.Mileage}','{vehicleDTO.LastServiceDate}','{vehicleDTO.OwnerId}' )";
+                    await _context.Database.ExecuteSqlRawAsync(sql);
+                    return RedirectToAction(nameof(Index));
+                }
+                ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstName", vehicleDTO.OwnerId);
+                return View(vehicleDTO);
+            }
+            catch
+            { 
+                return View("Error");
+            }
+        }
+
+        // GET: Vehicles/Edit/5
+        public async Task<IActionResult> Edit(int? id)
+        {
+            try
+            {
+                if (id == null)
+                {
+                    return NotFound();
+                }
+
+                var sql = $"SELECT * FROM [Vehicles] WHERE VehicleId = {id}";
+                var vehicle = await _context.Vehicles.FromSqlRaw(sql).FirstOrDefaultAsync();
+                if (vehicle == null)
+                {
+                    return NotFound();
+                }
+                var vehicleDTO = new VehicleDTO
+                {
+                    VehicleId = vehicle.VehicleId,
+                    Make = vehicle.Make,
+                    Model = vehicle.Model,
+                    Year = vehicle.Year,
+                    Vin = vehicle.Vin,
+                    Mileage = vehicle.Mileage,
+                    LastServiceDate = vehicle.LastServiceDate,
+                    OwnerId = vehicle.OwnerId,
+                    Owner = new CustomerDTO
+                    {
+                        CustomerId = vehicle.Owner.CustomerId,
+                        FirstName = vehicle.Owner.FirstName,
+                        LastName = vehicle.Owner.LastName,
+                        Email = vehicle.Owner.Email,
+                        Phone = vehicle.Owner.Phone,
+                        Address = vehicle.Owner.Address
+                    }
+                };
+                ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstName", vehicle.OwnerId);
+                return View(vehicleDTO);
+            }
+            catch
+            {
+                return View("Error");
+            }
+        }
+
+        // POST: Vehicles/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("VehicleId,Make,Model,Year,Vin,Mileage,LastServiceDate,OwnerId")] VehicleDTO vehicleDTO)
+        {
+            try
+            {
+                if (id != vehicleDTO.VehicleId)
+                {
+                    return NotFound();
+                }
+
+                if (ModelState.IsValid)
+                {
+                    var sql = $"UPDATE [Vehicles] SET Make = '{vehicleDTO.Make}', Model = '{vehicleDTO.Model}',Year = '{vehicleDTO.Year}', Vin = '{vehicleDTO.Vin}', Mileage = '{vehicleDTO.Mileage}', LastServiceDate = '{vehicleDTO.LastServiceDate}', OwnerId = '{vehicleDTO.OwnerId}' WHERE VehicleId = {vehicleDTO.VehicleId}";
+                    await _context.Database.ExecuteSqlRawAsync(sql);
+
+                    return RedirectToAction(nameof(Index));
+                }
+                ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstName", vehicleDTO.OwnerId);
+                return View(vehicleDTO);
+            }
+            catch
+            {
+                return View("Error");
+            }
+        }
+
+        // GET: Vehicles/Delete/5
+        public async Task<IActionResult> Delete(int? id)
+        {
+            try
+            {
+
+                if (id == null)
+                {
+                    return NotFound();
+                }
+
+                var vehicle = await _context.Vehicles
+                    .Include(v => v.Owner)
+                    .FirstOrDefaultAsync(m => m.VehicleId == id);
+
+                if (vehicle == null)
+                {
+                    return NotFound();
+                }
+
+                var vehicleDTO = new VehicleDTO
+                {
+                    VehicleId = vehicle.VehicleId,
+                    Make = vehicle.Make,
+                    Model = vehicle.Model,
+                    Year = vehicle.Year,
+                    Vin = vehicle.Vin,
+                    Mileage = vehicle.Mileage,
+                    LastServiceDate = vehicle.LastServiceDate,
+                    OwnerId = vehicle.OwnerId,
+                    Owner = new CustomerDTO
+                    {
+                        CustomerId = vehicle.Owner.CustomerId,
+                        FirstName = vehicle.Owner.FirstName,
+                        LastName = vehicle.Owner.LastName,
+                        Email = vehicle.Owner.Email,
+                        Phone = vehicle.Owner.Phone,
+                        Address = vehicle.Owner.Address
+                    }
+                };
+
+                return View(vehicleDTO);
+            }
+            catch
+            {
+                return View("Error");
+            }
+        }
+
+        // POST: Vehicles/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            try
+            {
+                if (id == null)
+                {
+                    return NotFound();
+                }
+
+                //var vehicle = await _context.Vehicles
+                //    .Include(v => v.Owner)
+                //    .FirstOrDefaultAsync(m => m.VehicleId == id);
+
+                if (!VehicleExists(id))
+                {
+                    return NotFound();
+                }
+
+                await _context.Database.ExecuteSqlRawAsync($"DELETE FROM Vehicles WHERE VehicleId = {id}");
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View("Error");
+            }
+        }
+
+        private bool VehicleExists(int id)
+        {
+            return _context.Vehicles.Any(e => e.VehicleId == id);
+        }
+    }
+}
