@@ -5,9 +5,13 @@ public class CustomerDTO
     {
     public int CustomerId { get; set; }
 
+    [RegularExpression(@"^[a-zA-Z]+$",
+        ErrorMessage = "Invalid characters in the name field.")]
     [Required]
     public string FirstName { get; set; }
 
+    [RegularExpression(@"^[a-zA-Z]+$",
+        ErrorMessage = "Invalid characters in the name field.")]
     [Required]
     public string LastName { get; set; }
 
@@ -15,6 +19,8 @@ public class CustomerDTO
     [EmailAddress]
     public string Email { get; set; }
 
+    [RegularExpression(@"^(0|\+972\-?|0\s|-)([23489]{1}\d{7}|\d{8})$",
+        ErrorMessage = "Invalid phone.")]
     [Phone]
     public string Phone { get; set; }
 
