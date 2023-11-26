@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -99,7 +98,7 @@ namespace Garage_Management.Controllers
             {
                     var maxCustomerId = await _context.Customers.MaxAsync(c => (int?)c.CustomerId) ?? 0;
                     var newCustomerId = maxCustomerId + 1;
-                    var sql = $"INSERT INTO [Customers] (CustomerId,FirstName,LastName,Email,Phone,Address) VALUES ({newCustomerId}, '{customerDTO.FirstName}, '{customerDTO.LastName}, '{customerDTO.Email}, '{customerDTO.Phone}, '{customerDTO.Address}')";
+                    var sql = $"INSERT INTO [Customers] (CustomerId,FirstName,LastName,Email,Phone,Address) VALUES ({newCustomerId}, '{customerDTO.FirstName}', '{customerDTO.LastName}', '{customerDTO.Email}', '{customerDTO.Phone}', '{customerDTO.Address}')";
                     await _context.Database.ExecuteSqlRawAsync(sql);
                     return RedirectToAction(nameof(Index));
             }
@@ -190,7 +189,17 @@ namespace Garage_Management.Controllers
                 return NotFound();
             }
 
-            return View(customer);
+            var customerDTO = new CustomerDTO
+            {
+                CustomerId = customer.CustomerId,
+                FirstName = customer.FirstName,
+                LastName = customer.LastName,
+                Email = customer.Email,
+                Phone = customer.Phone,
+                Address = customer.Address
+            };
+
+            return View(customerDTO);
         }
 
         // POST: Customers/Delete/5
@@ -198,6 +207,8 @@ namespace Garage_Management.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            try
+            { 
             var customer = await _context.Customers.FindAsync(id);
             if (customer != null)
             {
@@ -206,6 +217,11 @@ namespace Garage_Management.Controllers
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View("Error");
+            }
         }
 
         private bool CustomerExists(int id)
