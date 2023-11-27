@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Garage_Management.Models;
 using Garage_Management.DTO;
 using System.Net;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Garage_Management.Controllers
 {
@@ -39,19 +40,20 @@ namespace Garage_Management.Controllers
                         Mileage = v.Mileage,
                         LastServiceDate = v.LastServiceDate,
                         OwnerId = v.OwnerId,
-                        Owner = await _context.Customers
-                            .FromSqlRaw(sql_customer, v.OwnerId)
-                            .FirstOrDefaultAsync()
-                //Owner = new CustomerDTO
-                //{
-                //    CustomerId = v.Owner.CustomerId,
-                //    FirstName = v.Owner.FirstName,
-                //    LastName = v.Owner.LastName,
-                //    Email = v.Owner.Email,
-                //    Phone = v.Owner.Phone,
-                //    Address = v.Owner.Address
-                //}
-            }).Select(t => t.Result).ToList();
+                        OwnerName = await _context.Customers.FromSqlRaw(sql_customer, v.OwnerId).Select(c => c.FirstName).FirstOrDefaultAsync()
+                        //Owner = await _context.Customers
+                        //    .FromSqlRaw(sql_customer, v.OwnerId)
+                        //    .FirstOrDefaultAsync()
+                        //Owner = new CustomerDTO
+                        //{
+                        //    CustomerId = v.Owner.CustomerId,
+                        //    FirstName = v.Owner.FirstName,
+                        //    LastName = v.Owner.LastName,
+                        //    Email = v.Owner.Email,
+                        //    Phone = v.Owner.Phone,
+                        //    Address = v.Owner.Address
+                        //}
+                    }).Select(t => t.Result).ToList();
 
                 return View(vehicleDTOs);
             }
@@ -89,9 +91,10 @@ namespace Garage_Management.Controllers
                     Mileage = vehicle.Mileage,
                     LastServiceDate = vehicle.LastServiceDate,
                     OwnerId = vehicle.OwnerId,
-                    Owner = await _context.Customers
-                            .FromSqlRaw(sql_customer, vehicle.OwnerId)
-                            .FirstOrDefaultAsync()
+                    OwnerName = await _context.Customers.FromSqlRaw(sql_customer, vehicle.OwnerId).Select(c => c.FirstName).FirstOrDefaultAsync()
+                    //Owner = await _context.Customers
+                    //        .FromSqlRaw(sql_customer, vehicle.OwnerId)
+                    //        .FirstOrDefaultAsync()
                     //Owner = new CustomerDTO
                     //{
                     //    CustomerId = vehicle.Owner.CustomerId,
@@ -124,33 +127,35 @@ namespace Garage_Management.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("VehicleId,Make,Model,Year,Vin,Mileage,LastServiceDate,OwnerId,Owner")] VehicleDTO vehicleDTO)
+        public async Task<IActionResult> Create([Bind("VehicleId,Make,Model,Year,Vin,Mileage,LastServiceDate,OwnerId,OwnerName")] VehicleDTO vehicleDTO)
         {
+            //var sql1 = "INSERT INTO [Vehicles] (VehicleId, Make, Model, Year, Vin, Mileage, LastServiceDate, OwnerId) VALUES (1, 'Toyota', 'Camry', 2022, 'ABC123XYZ789', 50000, '2023-11-26', 1)";
+            
             try
             {
                 if (ModelState.IsValid)
                 {
                     var maxVehicleId = await _context.Vehicles.MaxAsync(v => (int?)v.VehicleId) ?? 0;
                     var newVehicleId = maxVehicleId + 1;
-                    var sql = $"INSERT INTO [Vehicles] (VehicleId,Make,Model,Year,Vin,Mileage,LastServiceDate,OwnerId) VALUES ({newVehicleId}, '{vehicleDTO.Make}',{vehicleDTO.Year},'{vehicleDTO.Vin}','{vehicleDTO.Mileage}',{vehicleDTO.LastServiceDate},{vehicleDTO.OwnerId})";
+                    var sql = $"INSERT INTO [Vehicles] (VehicleId, Make, Model, Year, Vin, Mileage, LastServiceDate, OwnerId) VALUES ({newVehicleId}, '{vehicleDTO.Make}', '{vehicleDTO.Model}', {vehicleDTO.Year}, '{vehicleDTO.Vin}', {vehicleDTO.Mileage}, '{vehicleDTO.LastServiceDate}' ,{vehicleDTO.OwnerId})";
                     await _context.Database.ExecuteSqlRawAsync(sql);
 
-                    var vehicle = await _context.Vehicles
-               .Include(v => v.Owner)
-               .FirstOrDefaultAsync(m => m.VehicleId == newVehicleId);
+               //     var vehicle = await _context.Vehicles
+               //.Include(v => v.Owner)
+               //.FirstOrDefaultAsync(m => m.VehicleId == newVehicleId);
 
-                    if (vehicle != null)
-                    {
-                        vehicleDTO.Owner = new CustomerDTO
-                        {
-                            CustomerId = vehicle.Owner.CustomerId,
-                            FirstName = vehicle.Owner.FirstName,
-                            LastName = vehicle.Owner.LastName,
-                            Email = vehicle.Owner.Email,
-                            Phone = vehicle.Owner.Phone,
-                            Address = vehicle.Owner.Address
-                        };
-                    }
+                    //if (vehicle != null)
+                    //{
+                    //    vehicleDTO.Owner = new CustomerDTO
+                    //    {
+                    //        CustomerId = vehicle.Owner.CustomerId,
+                    //        FirstName = vehicle.Owner.FirstName,
+                    //        LastName = vehicle.Owner.LastName,
+                    //        Email = vehicle.Owner.Email,
+                    //        Phone = vehicle.Owner.Phone,
+                    //        Address = vehicle.Owner.Address
+                    //    };
+                    //}
 
                     //                var owner = await _context.Customers
                     //.FromSqlRaw(sql_customer, vehicleDTO.OwnerId)
@@ -166,9 +171,9 @@ namespace Garage_Management.Controllers
                 ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstName", vehicleDTO.OwnerId);
                 return View(vehicleDTO);
             }
-            catch
-            { 
-                return View("Error");
+            catch (Exception ex)
+            {
+                return RedirectToAction(nameof(Error));
             }
         }
 
@@ -198,15 +203,16 @@ namespace Garage_Management.Controllers
                     Mileage = vehicle.Mileage,
                     LastServiceDate = vehicle.LastServiceDate,
                     OwnerId = vehicle.OwnerId,
-                    Owner = new CustomerDTO
-                    {
-                        CustomerId = vehicle.Owner.CustomerId,
-                        FirstName = vehicle.Owner.FirstName,
-                        LastName = vehicle.Owner.LastName,
-                        Email = vehicle.Owner.Email,
-                        Phone = vehicle.Owner.Phone,
-                        Address = vehicle.Owner.Address
-                    }
+                    OwnerName = await _context.Customers.FromSqlRaw(sql_customer, vehicle.OwnerId).Select(c => c.FirstName).FirstOrDefaultAsync()
+                    //Owner = new CustomerDTO
+                    //{
+                    //    CustomerId = vehicle.Owner.CustomerId,
+                    //    FirstName = vehicle.Owner.FirstName,
+                    //    LastName = vehicle.Owner.LastName,
+                    //    Email = vehicle.Owner.Email,
+                    //    Phone = vehicle.Owner.Phone,
+                    //    Address = vehicle.Owner.Address
+                    //}
                 };
                 ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstName", vehicle.OwnerId);
                 return View(vehicleDTO);
@@ -222,7 +228,7 @@ namespace Garage_Management.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("VehicleId,Make,Model,Year,Vin,Mileage,LastServiceDate,OwnerId")] VehicleDTO vehicleDTO)
+        public async Task<IActionResult> Edit(int id, [Bind("VehicleId,Make,Model,Year,Vin,Mileage,LastServiceDate,OwnerId,OwnerName")] VehicleDTO vehicleDTO)
         {
             try
             {
@@ -233,7 +239,7 @@ namespace Garage_Management.Controllers
 
                 if (ModelState.IsValid)
                 {
-                    var sql = $"UPDATE [Vehicles] SET Make = '{vehicleDTO.Make}', Model = '{vehicleDTO.Model}',Year = '{vehicleDTO.Year}', Vin = '{vehicleDTO.Vin}', Mileage = '{vehicleDTO.Mileage}', LastServiceDate = '{vehicleDTO.LastServiceDate}', OwnerId = '{vehicleDTO.OwnerId}' WHERE VehicleId = {vehicleDTO.VehicleId}";
+                    var sql = $"UPDATE [Vehicles] SET Make = '{vehicleDTO.Make}', Model = '{vehicleDTO.Model}',Year = {vehicleDTO.Year}, Vin = '{vehicleDTO.Vin}', Mileage = {vehicleDTO.Mileage}, LastServiceDate = '{vehicleDTO.LastServiceDate}', OwnerId = {vehicleDTO.OwnerId} WHERE VehicleId = {vehicleDTO.VehicleId}";
                     await _context.Database.ExecuteSqlRawAsync(sql);
 
                     return RedirectToAction(nameof(Index));
@@ -277,15 +283,16 @@ namespace Garage_Management.Controllers
                     Mileage = vehicle.Mileage,
                     LastServiceDate = vehicle.LastServiceDate,
                     OwnerId = vehicle.OwnerId,
-                    Owner = new CustomerDTO
-                    {
-                        CustomerId = vehicle.Owner.CustomerId,
-                        FirstName = vehicle.Owner.FirstName,
-                        LastName = vehicle.Owner.LastName,
-                        Email = vehicle.Owner.Email,
-                        Phone = vehicle.Owner.Phone,
-                        Address = vehicle.Owner.Address
-                    }
+                    OwnerName = await _context.Customers.FromSqlRaw(sql_customer, vehicle.OwnerId).Select(c => c.FirstName).FirstOrDefaultAsync()
+                    //Owner = new CustomerDTO
+                    //{
+                    //    CustomerId = vehicle.Owner.CustomerId,
+                    //    FirstName = vehicle.Owner.FirstName,
+                    //    LastName = vehicle.Owner.LastName,
+                    //    Email = vehicle.Owner.Email,
+                    //    Phone = vehicle.Owner.Phone,
+                    //    Address = vehicle.Owner.Address
+                    //}
                 };
 
                 return View(vehicleDTO);

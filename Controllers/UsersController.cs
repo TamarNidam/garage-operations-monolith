@@ -24,6 +24,7 @@ namespace Garage_Management.Controllers
         {
             try
             {
+               
                 var sql = "SELECT * FROM [Users]";
                 var users = await _context.Users.FromSqlRaw(sql).ToListAsync();
                 var userDTOs = users
@@ -90,6 +91,7 @@ namespace Garage_Management.Controllers
         {
             try
             {
+                
                 if (ModelState.IsValid)
                 {
                     var maxUserId = await _context.Users.MaxAsync(u => (int?)u.UserId) ?? 0;

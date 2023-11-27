@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Garage_Management.Models;
+using Garage_Management.DTO;
 
 namespace Garage_Management.Controllers
 {
@@ -21,7 +22,30 @@ namespace Garage_Management.Controllers
         // GET: Garages
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Garages.ToListAsync());
+            try
+            {
+                var sql = "SELECT * FROM [Garages]";
+                var garages = await _context.Garages.FromSqlRaw(sql).ToListAsync();
+                var garageDTOs = garages
+                        .Select(g => new GarageDTO
+                        {
+                            GarageId = g.GarageId,
+                            GarageName = g.GarageName,
+                            Address = g.Address,
+                            PhoneNumber = g.PhoneNumber
+                            //GaragePermissions = g.GaragePermissions,
+                            //GarageVisits = g.GarageVisits
+                        }).ToList();
+
+                return View(garageDTOs); 
+                //return View(await _context.Garages.ToListAsync());
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Error"); ;
+            }
+        
+           
         }
 
         // GET: Garages/Details/5
