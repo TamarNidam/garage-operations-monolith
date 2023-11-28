@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Garage_Management.Models;
 using Garage_Management.DTO;
+using Microsoft.Data.SqlClient;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Garage_Management.Controllers
 {
@@ -34,11 +36,12 @@ namespace Garage_Management.Controllers
                             Username = u.Username,
                             Password = u.Password
                         }).ToList();
-
+                ViewBag.ActivateLayout = true;
                 return View(userDTOs);
             }
             catch
             {
+                ViewBag.ActivateLayout = true;
                 return View("Error");
             }
 
@@ -67,25 +70,76 @@ namespace Garage_Management.Controllers
                     Username = user.Username,
                     Password = user.Password
                 };
-
+                ViewBag.ActivateLayout = true;
                 return View(userDTO);
             }
             catch
             {
+                ViewBag.ActivateLayout = true;
+
                 return View("Error");
             }
         }
 
+
+        // GET: Users/SignUp
+        public IActionResult SignUp()
+        {
+            ViewBag.ActivateLayout = false;
+            return View();
+        }
+
+        // POST: Users/SignUp
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SignUp([Bind("UserId,Username,Password")] UserDTO userDTO)
+        {
+            try
+            {
+
+                if (ModelState.IsValid)
+                {
+                    var sql = "SELECT UserId, Username, Password FROM [Users] WHERE Username = @Username AND Password = @Password";
+
+                    var usernameParameter = new SqlParameter("@Username", userDTO.Username);
+                    var passwordParameter = new SqlParameter("@Password", userDTO.Password);
+
+                    var user = await _context.Users.FromSqlRaw(sql, usernameParameter, passwordParameter)
+                        .FirstOrDefaultAsync();
+
+                    //var user = await _context.Users.FindAsync(id);
+                    if (user == null)
+                    {
+                        ViewBag.ActivateLayout = false;
+                        ViewBag.ErrorMessage = "User does not exist";
+                        return View(userDTO);
+                    }
+                    //return RedirectToAction(nameof(Index));
+                    //ViewBag.ActivateLayout = true;
+                    return Redirect("Home/Index1");
+
+                }
+                ViewBag.ActivateLayout = false;
+                return View(userDTO);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ActivateLayout = false;
+                return RedirectToAction(nameof(Error));
+            }
+        }
+
+
+
         // GET: Users/Create
         public IActionResult Create()
         {
+            ViewBag.ActivateLayout = false;
             return View();
         }
 
         // POST: Users/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
+         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("UserId,Username,Password")] UserDTO userDTO)
         {
@@ -110,10 +164,12 @@ namespace Garage_Management.Controllers
                     //await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
                 }
+                ViewBag.ActivateLayout = true;
                 return View(userDTO);
             }
             catch
             {
+                ViewBag.ActivateLayout = true;
                 return View("Error");
             }
         }
@@ -141,11 +197,12 @@ namespace Garage_Management.Controllers
                     Username = user.Username,
                     Password = user.Password
                 };
-
+                ViewBag.ActivateLayout = true;
                 return View(userDTO);
             }
             catch
             {
+                ViewBag.ActivateLayout = true;
                 return View("Error");
             }
         }
@@ -194,10 +251,12 @@ namespace Garage_Management.Controllers
                     //}
                     return RedirectToAction(nameof(Index));
                 }
+                ViewBag.ActivateLayout = true;
                 return View(userDTO);
             }
             catch
             {
+                ViewBag.ActivateLayout = true;
                 return View("Error");
             }
         }
@@ -225,10 +284,12 @@ namespace Garage_Management.Controllers
                     Password = user.Password
                 };
 
+                ViewBag.ActivateLayout = true;
                 return View(userDTO);
             }
             catch
             {
+                ViewBag.ActivateLayout = true;
                 return View("Error");
             }
         }
@@ -251,6 +312,7 @@ namespace Garage_Management.Controllers
             }
             catch
             {
+                ViewBag.ActivateLayout = true;
                 return View("Error");
             }
         }

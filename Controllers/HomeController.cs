@@ -15,13 +15,15 @@ namespace Garage_Management.Controllers
 
         public IActionResult Index()
         {
+            ViewBag.ActivateLayout = true;
+            return View();
+        }
+        public IActionResult Index1()
+        {
+            ViewBag.ActivateLayout = true;
             return View();
         }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
