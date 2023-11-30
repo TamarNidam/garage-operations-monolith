@@ -13,14 +13,16 @@ namespace Garage_Management.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(int? userid)
         {
-            ViewBag.ActivateLayout = true;
-            return View();
-        }
-        public IActionResult Index1()
-        {
-            ViewBag.ActivateLayout = true;
+            if (userid == 0)
+            {
+                ViewBag.ActivateLayout = 0;
+            }
+            else
+            {
+                ViewBag.ActivateLayout = 1;
+            }
             return View();
         }
 

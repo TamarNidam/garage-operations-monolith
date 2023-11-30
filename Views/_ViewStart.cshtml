@@ -1,7 +1,11 @@
 ﻿@{
-    if (ViewBag.ActivateLayout)
+    if (ViewBag.ActivateLayout == 0)
     {
         Layout = "_Layout";
+    }
+    else if(ViewBag.ActivateLayout == 1)
+    {
+        Layout = "_Layout1";
     }
     else
     {

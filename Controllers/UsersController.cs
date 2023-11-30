@@ -36,29 +36,37 @@ namespace Garage_Management.Controllers
                             Username = u.Username,
                             Password = u.Password
                         }).ToList();
-                ViewBag.ActivateLayout = true;
+                ViewBag.ActivateLayout = 0;
                 return View(userDTOs);
             }
             catch
             {
-                ViewBag.ActivateLayout = true;
+                ViewBag.ActivateLayout = 0;
                 return View("Error");
             }
 
         }
 
         // GET: Users/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? userid, int? id)
         {
+            var thisid =userid;
+            if(userid == 0)
+            {
+                thisid = id;
+            }
+           
+
             try
             {
-                if (id == null)
+                if (thisid == null)
                 {
                     return NotFound();
                 }
 
                 var user = await _context.Users
-                    .FirstOrDefaultAsync(m => m.UserId == id);
+                    .FirstOrDefaultAsync(m => m.UserId == thisid);
+
                 if (user == null)
                 {
                     return NotFound();
@@ -70,12 +78,17 @@ namespace Garage_Management.Controllers
                     Username = user.Username,
                     Password = user.Password
                 };
-                ViewBag.ActivateLayout = true;
+                ViewBag.ActivateLayout = 1;
+                if (thisid == 0)
+                {
+ViewBag.ActivateLayout = 0;
+                }
+                    
                 return View(userDTO);
             }
             catch
             {
-                ViewBag.ActivateLayout = true;
+                ViewBag.ActivateLayout = 2;
 
                 return View("Error");
             }
@@ -85,7 +98,7 @@ namespace Garage_Management.Controllers
         // GET: Users/SignUp
         public IActionResult SignUp()
         {
-            ViewBag.ActivateLayout = false;
+            ViewBag.ActivateLayout = 2;
             return View();
         }
 
@@ -110,21 +123,20 @@ namespace Garage_Management.Controllers
                     //var user = await _context.Users.FindAsync(id);
                     if (user == null)
                     {
-                        ViewBag.ActivateLayout = false;
+                        ViewBag.ActivateLayout = 2;
                         ViewBag.ErrorMessage = "User does not exist";
                         return View(userDTO);
                     }
-                    //return RedirectToAction(nameof(Index));
-                    //ViewBag.ActivateLayout = true;
-                    return Redirect("Home/Index1");
+                    
+                    return Redirect($"{user.UserId}/Home/Index");
 
                 }
-                ViewBag.ActivateLayout = false;
+                ViewBag.ActivateLayout = 2;
                 return View(userDTO);
             }
             catch (Exception ex)
             {
-                ViewBag.ActivateLayout = false;
+                ViewBag.ActivateLayout = 2;
                 return RedirectToAction(nameof(Error));
             }
         }
@@ -134,7 +146,7 @@ namespace Garage_Management.Controllers
         // GET: Users/Create
         public IActionResult Create()
         {
-            ViewBag.ActivateLayout = false;
+            ViewBag.ActivateLayout = 0;
             return View();
         }
 
@@ -151,17 +163,9 @@ namespace Garage_Management.Controllers
                     var maxUserId = await _context.Users.MaxAsync(u => (int?)u.UserId) ?? 0;
                     var newUserId = maxUserId + 1;
                     var sql = $"INSERT INTO [Users] (UserId, Username, Password) VALUES ({newUserId}, '{userDTO.Username}', '{userDTO.Password}')";
-                    //var sql = $"INSERT INTO Users (UserId, Username, Password) VALUES ({userDTO.UserId}, '{userDTO.Username}', '{userDTO.Password}')";
+                    
                     await _context.Database.ExecuteSqlRawAsync(sql);
-                    //var user = new User
-                    //{
-                    //    UserId = userDTO.UserId,
-                    //    Username = userDTO.Username,
-                    //    Password = userDTO.Password
-                    //};
-
-                    //_context.Add(user);
-                    //await _context.SaveChangesAsync();
+                    
                     return RedirectToAction(nameof(Index));
                 }
                 ViewBag.ActivateLayout = true;
