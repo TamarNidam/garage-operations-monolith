@@ -1,8 +1,7 @@
-﻿@{
-    var routeValues = ViewContext.RouteData.Values;
-    string directory = routeValues["directory"]?.ToString();
-    int? userid = Convert.ToInt32(routeValues["userid"]);
-    int? id = Convert.ToInt32(routeValues["id"]);
+﻿@using Microsoft.AspNetCore.Http
+@{
+    int? userid = Convert.ToInt32(Context.Request.Query["userid"]);
+    int? id = Convert.ToInt32(Context.Request.Query["id"]);
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -26,17 +25,29 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-dark" asp-area="" asp-route-userid="@userid" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        @* <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-acti6on="Privacy">Privacy</a>
-                        </li> *@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area=""  asp-controller="Users" asp-action="SignUp">Sign Up</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-route-userid="@userid" asp-controller="Users" asp-action="Index">USERs</a>
-                        </li>
+                        
+                            @if (userid == 0)
+                            {
+                                <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-route-userid="@userid" asp-controller="Users" asp-action="Index">Users</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-route-userid="@userid" asp-controller="Permissions" asp-action="Index">Permissions</a>
+                            </li>
+                        }
+                            else
+                            {
+                                <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-route-userid="@userid" asp-controller="Users" asp-action="Index">My User</a>
+                            </li>
+                            }
+
+                        
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-route-userid="@userid" asp-controller="Vehicles" asp-action="Index">Vehicles</a>
                         </li>
@@ -45,6 +56,9 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-route-userid="@userid" asp-controller="Customers" asp-action="Index">Customers</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-route-userid="@userid" asp-controller="GarageVisits" asp-action="Index">Garage Visits</a>
                         </li>
                     </ul>
                 </div>

@@ -9,6 +9,7 @@ using Garage_Management.Models;
 using Garage_Management.DTO;
 using Microsoft.Data.SqlClient;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Garage_Management.Controllers
 {
@@ -22,12 +23,19 @@ namespace Garage_Management.Controllers
         }
 
         // GET: Users
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? userid)
         {
-            try
+          try
             {
-               
-                var sql = "SELECT * FROM [Users]";
+                string sql;
+                if (userid == 0)
+                {
+                    sql = "SELECT * FROM [Users]";
+                }
+                else
+                {
+                    sql = $"SELECT * FROM [Users] WHERE UserId= {userid}";
+                }
                 var users = await _context.Users.FromSqlRaw(sql).ToListAsync();
                 var userDTOs = users
                         .Select(u => new UserDTO
@@ -36,36 +44,36 @@ namespace Garage_Management.Controllers
                             Username = u.Username,
                             Password = u.Password
                         }).ToList();
+
                 ViewBag.ActivateLayout = 0;
                 return View(userDTOs);
             }
             catch
             {
-                ViewBag.ActivateLayout = 0;
+                ViewBag.ActivateLayout = 2;
                 return View("Error");
             }
 
         }
 
         // GET: Users/Details/5
-        public async Task<IActionResult> Details(int? userid, int? id)
+        public async Task<IActionResult> Details(int userid, int? id)
         {
-            var thisid =userid;
-            if(userid == 0)
-            {
-                thisid = id;
-            }
-           
-
             try
             {
+                int thisid = userid;
+                if (userid == 0)
+                {
+                    thisid = id.Value;
+                }
                 if (thisid == null)
                 {
                     return NotFound();
                 }
 
                 var user = await _context.Users
-                    .FirstOrDefaultAsync(m => m.UserId == thisid);
+                .FromSqlRaw("SELECT TOP 1 * FROM Users WHERE UserId = {0}", thisid)
+                .FirstOrDefaultAsync();
 
                 if (user == null)
                 {
@@ -78,18 +86,13 @@ namespace Garage_Management.Controllers
                     Username = user.Username,
                     Password = user.Password
                 };
-                ViewBag.ActivateLayout = 1;
-                if (thisid == 0)
-                {
-ViewBag.ActivateLayout = 0;
-                }
-                    
+
+                ViewBag.ActivateLayout = 0;
                 return View(userDTO);
             }
             catch
             {
                 ViewBag.ActivateLayout = 2;
-
                 return View("Error");
             }
         }
@@ -112,12 +115,12 @@ ViewBag.ActivateLayout = 0;
 
                 if (ModelState.IsValid)
                 {
-                    var sql = "SELECT UserId, Username, Password FROM [Users] WHERE Username = @Username AND Password = @Password";
+                    var sql = "SELECT UserId, Username, Password FROM [Users] WHERE Username = {0} AND Password = {1}";
 
-                    var usernameParameter = new SqlParameter("@Username", userDTO.Username);
-                    var passwordParameter = new SqlParameter("@Password", userDTO.Password);
+                    //var usernameParameter = new SqlParameter("@Username", userDTO.Username);
+                    //var passwordParameter = new SqlParameter("@Password", userDTO.Password);
 
-                    var user = await _context.Users.FromSqlRaw(sql, usernameParameter, passwordParameter)
+                    var user = await _context.Users.FromSqlRaw(sql, userDTO.Username, userDTO.Password)
                         .FirstOrDefaultAsync();
 
                     //var user = await _context.Users.FindAsync(id);
@@ -127,20 +130,19 @@ ViewBag.ActivateLayout = 0;
                         ViewBag.ErrorMessage = "User does not exist";
                         return View(userDTO);
                     }
-                    
-                    return Redirect($"{user.UserId}/Home/Index");
+
+                    return Redirect($"/Home/Index?userid={user.UserId}");
 
                 }
                 ViewBag.ActivateLayout = 2;
                 return View(userDTO);
             }
-            catch (Exception ex)
+            catch 
             {
                 ViewBag.ActivateLayout = 2;
-                return RedirectToAction(nameof(Error));
+                return View("Error");
             }
         }
-
 
 
         // GET: Users/Create
@@ -151,29 +153,40 @@ ViewBag.ActivateLayout = 0;
         }
 
         // POST: Users/Create
-         [HttpPost]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("UserId,Username,Password")] UserDTO userDTO)
+        public async Task<IActionResult> Create(int userid, [Bind("UserId,Username,Password")] UserDTO userDTO)
         {
             try
             {
-                
+
                 if (ModelState.IsValid)
                 {
+                    var u = await _context.Users
+                .FromSqlRaw("SELECT TOP 1 * FROM Users WHERE Username = {0}", userDTO.Username)
+                .FirstOrDefaultAsync();
+                    if (u != null)
+                    {
+                        ViewBag.ActivateLayout = 0;
+                        ViewBag.ErrorMessage = "User name exist";
+                        return View(userDTO);
+                    }
                     var maxUserId = await _context.Users.MaxAsync(u => (int?)u.UserId) ?? 0;
                     var newUserId = maxUserId + 1;
                     var sql = $"INSERT INTO [Users] (UserId, Username, Password) VALUES ({newUserId}, '{userDTO.Username}', '{userDTO.Password}')";
-                    
+
                     await _context.Database.ExecuteSqlRawAsync(sql);
-                    
-                    return RedirectToAction(nameof(Index));
+
+                    return Redirect($"/Users/Index?userid={userid}");
+                    //return RedirectToAction(nameof(Index));
                 }
-                ViewBag.ActivateLayout = true;
+
+                ViewBag.ActivateLayout = 0;
                 return View(userDTO);
             }
             catch
             {
-                ViewBag.ActivateLayout = true;
+                ViewBag.ActivateLayout = 2;
                 return View("Error");
             }
         }
@@ -190,77 +203,54 @@ ViewBag.ActivateLayout = 0;
                 var sql = $"SELECT UserId, Username, Password FROM [Users] WHERE UserId = {id}";
                 var user = await _context.Users.FromSqlRaw(sql).FirstOrDefaultAsync();
 
-                //var user = await _context.Users.FindAsync(id);
                 if (user == null)
                 {
                     return NotFound();
                 }
+
                 var userDTO = new UserDTO
                 {
                     UserId = user.UserId,
                     Username = user.Username,
                     Password = user.Password
                 };
-                ViewBag.ActivateLayout = true;
+
+                ViewBag.ActivateLayout = 0;
                 return View(userDTO);
             }
             catch
             {
-                ViewBag.ActivateLayout = true;
+                ViewBag.ActivateLayout = 2;
                 return View("Error");
             }
         }
 
         // POST: Users/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("UserId,Username,Password")] UserDTO userDTO)
+        public async Task<IActionResult> Edit(int userid,int id, [Bind("UserId,Username,Password")] UserDTO userDTO)
         {
             try
             {
-                if (id != userDTO.UserId)
-                {
-                    return NotFound();
-                }
+                //if (id != userDTO.UserId)
+                //{
+                //    return NotFound();
+                //}
 
                 if (ModelState.IsValid)
                 {
                     var sql = $"UPDATE [Users] SET Username = '{userDTO.Username}', Password = '{userDTO.Password}' WHERE UserId = {userDTO.UserId}";
                     await _context.Database.ExecuteSqlRawAsync(sql);
-
-                    //var user = new User
-                    //{
-                    //    UserId = userDTO.UserId,
-                    //    Username = userDTO.Username,
-                    //    Password = userDTO.Password
-                    //};
-
-                    //try
-                    //{
-                    //    _context.Update(user);
-                    //    await _context.SaveChangesAsync();
-                    //}
-                    //catch (DbUpdateConcurrencyException)
-                    //{
-                    //    if (!UserExists(userDTO.UserId))
-                    //    {
-                    //        return NotFound();
-                    //    }
-                    //    else
-                    //    {
-                    //        throw;
-                    //    }
-                    //}
-                    return RedirectToAction(nameof(Index));
+                    return Redirect($"/Users/Index?userid={userid}");
+                   //return RedirectToAction(nameof(Index));
                 }
-                ViewBag.ActivateLayout = true;
+
+                ViewBag.ActivateLayout = 0;
                 return View(userDTO);
             }
             catch
             {
-                ViewBag.ActivateLayout = true;
+                ViewBag.ActivateLayout = 2;
                 return View("Error");
             }
         }
@@ -270,7 +260,7 @@ ViewBag.ActivateLayout = 0;
         {
             try
             {
-                if (id == null)
+                if (id == null )
                 {
                     return NotFound();
                 }
@@ -288,12 +278,12 @@ ViewBag.ActivateLayout = 0;
                     Password = user.Password
                 };
 
-                ViewBag.ActivateLayout = true;
+                ViewBag.ActivateLayout = 0;
                 return View(userDTO);
             }
             catch
             {
-                ViewBag.ActivateLayout = true;
+                ViewBag.ActivateLayout = 2;
                 return View("Error");
             }
         }
@@ -301,22 +291,28 @@ ViewBag.ActivateLayout = 0;
         // POST: Users/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int userid, int id)
         {
             try
             {
-                var user = await _context.Users.FindAsync(id);
-                if (user != null)
+                if (id == null)
                 {
-                    _context.Users.Remove(user);
+                    return NotFound();
                 }
 
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                var sql = $"DELETE [Users] WHERE UserId = {id}";
+                await _context.Database.ExecuteSqlRawAsync(sql);
+                if (UserExists(id))
+                {
+                    ViewBag.ActivateLayout = 2;
+                    return View("Error");
+                }
+                return Redirect($"/Users/Index?userid={0}");
             }
             catch
             {
-                ViewBag.ActivateLayout = true;
+                ViewBag.ActivateLayout = 2;
                 return View("Error");
             }
         }

@@ -4,12 +4,25 @@
     ViewData["Title"] = "Details";
 }
 
+@using Microsoft.AspNetCore.Http
+@{
+    int? userid = Convert.ToInt32(Context.Request.Query["userid"]);
+    int? id = Convert.ToInt32(Context.Request.Query["id"]);
+}
+
+
 <h1>Details</h1>
 
 <div>
     <h4>User</h4>
     <hr />
     <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.UserId)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.UserId)
+        </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Username)
         </dt>
@@ -25,6 +38,20 @@
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.UserId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+     @if (userid == id)
+    {
+        <a asp-action="Edit" asp-route-userid="@userid" asp-route-id="@Model?.UserId">Edit</a>
+    
+     }
+    
+    @if (userid == 0)
+    {
+        if(id != 0)
+        {
+             <a asp-action="Delete" asp-route-userid="@userid" asp-route-id="@Model?.UserId">Delete</a>
+        }
+       
+        <a asp-action="Index" asp-route-userid="@userid">Back to List</a>
+    }
+    
 </div>
