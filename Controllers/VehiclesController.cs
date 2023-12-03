@@ -91,7 +91,7 @@ var caneditSql = $"SELECT * FROM [Permissions] WHERE UserId = {userid} AND Custo
         }
 
         // GET: Vehicles/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int userid, int? id)
         {
             try
             {
@@ -101,8 +101,8 @@ var caneditSql = $"SELECT * FROM [Permissions] WHERE UserId = {userid} AND Custo
                 }
 
                 var vehicle = await _context.Vehicles
-                    .Include(v => v.Owner)
-                    .FirstOrDefaultAsync(m => m.VehicleId == id);
+                .FromSqlRaw("SELECT TOP 1 * FROM Vehicles WHERE VehicleId = {0}", id)
+                .FirstOrDefaultAsync();
                 if (vehicle == null)
                 {
                     return NotFound();
@@ -119,19 +119,7 @@ var caneditSql = $"SELECT * FROM [Permissions] WHERE UserId = {userid} AND Custo
                     LastServiceDate = vehicle.LastServiceDate,
                     OwnerId = vehicle.OwnerId,
                     OwnerName = await _context.Customers.FromSqlRaw(sql_customer, vehicle.OwnerId).Select(c => c.FirstName).FirstOrDefaultAsync()
-                    //Owner = await _context.Customers
-                    //        .FromSqlRaw(sql_customer, vehicle.OwnerId)
-                    //        .FirstOrDefaultAsync()
-                    //Owner = new CustomerDTO
-                    //{
-                    //    CustomerId = vehicle.Owner.CustomerId,
-                    //    FirstName = vehicle.Owner.FirstName,
-                    //    LastName = vehicle.Owner.LastName,
-                    //    Email = vehicle.Owner.Email,
-                    //    Phone = vehicle.Owner.Phone,
-                    //    Address = vehicle.Owner.Address
-                    //}
-                };
+                                   };
                 ViewBag.ActivateLayout = 0;
                 return View(vehicleDTO);
             }
@@ -167,7 +155,7 @@ ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstNam
         // POST: Vehicles/Create
          [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(int userid, [Bind("VehicleId,Make,Model,Year,Vin,Mileage,LastServiceDate,OwnerId,OwnerName")] VehicleDTO vehicleDTO)
+        public async Task<IActionResult> Create(int userid,int? id ,[Bind("VehicleId,Make,Model,Year,Vin,Mileage,LastServiceDate,OwnerId,OwnerName")] VehicleDTO vehicleDTO)
         {
                        try
             {
@@ -230,22 +218,15 @@ ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstNam
                     LastServiceDate = vehicle.LastServiceDate,
                     OwnerId = vehicle.OwnerId,
                     OwnerName = await _context.Customers.FromSqlRaw(sql_customer, vehicle.OwnerId).Select(c => c.FirstName).FirstOrDefaultAsync()
-                    //Owner = new CustomerDTO
-                    //{
-                    //    CustomerId = vehicle.Owner.CustomerId,
-                    //    FirstName = vehicle.Owner.FirstName,
-                    //    LastName = vehicle.Owner.LastName,
-                    //    Email = vehicle.Owner.Email,
-                    //    Phone = vehicle.Owner.Phone,
-                    //    Address = vehicle.Owner.Address
-                    //}
                 };
                 ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstName", vehicle.OwnerId);
                 ViewBag.ActivateLayout = 0;
                 return View(vehicleDTO);
             }
-            catch(Exception ex) { 
-                return View("Error",ex);
+            catch (Exception ex)
+            {
+                ViewBag.ActivateLayout = 2;
+                return View("Error", ex);
             }
         }
 
@@ -254,21 +235,21 @@ ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstNam
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("VehicleId,Make,Model,Year,Vin,Mileage,LastServiceDate,OwnerId,OwnerName")] VehicleDTO vehicleDTO)
+        public async Task<IActionResult> Edit(int userid, int id, [Bind("VehicleId,Make,Model,Year,Vin,Mileage,LastServiceDate,OwnerId,OwnerName")] VehicleDTO vehicleDTO)
         {
             try
             {
-                if (id != vehicleDTO.VehicleId)
-                {
-                    return NotFound();
-                }
+                //if (id != vehicleDTO.VehicleId)
+                //{
+                //    return NotFound();
+                //}
 
                 if (ModelState.IsValid)
                 {
                     var sql = $"UPDATE [Vehicles] SET Make = '{vehicleDTO.Make}', Model = '{vehicleDTO.Model}',Year = {vehicleDTO.Year}, Vin = '{vehicleDTO.Vin}', Mileage = {vehicleDTO.Mileage}, LastServiceDate = '{vehicleDTO.LastServiceDate}', OwnerId = {vehicleDTO.OwnerId} WHERE VehicleId = {vehicleDTO.VehicleId}";
                     await _context.Database.ExecuteSqlRawAsync(sql);
 
-                    return RedirectToAction(nameof(Index));
+                    return Redirect($"/Home/Index?userid={userid}");
                 }
                 ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstName", vehicleDTO.OwnerId);
                 ViewBag.ActivateLayout = 0;
@@ -292,9 +273,7 @@ ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstNam
                     return NotFound();
                 }
 
-                var vehicle = await _context.Vehicles
-                    .Include(v => v.Owner)
-                    .FirstOrDefaultAsync(m => m.VehicleId == id);
+                var vehicle = await _context.Vehicles.FindAsync(id);
 
                 if (vehicle == null)
                 {
@@ -312,22 +291,14 @@ ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstNam
                     LastServiceDate = vehicle.LastServiceDate,
                     OwnerId = vehicle.OwnerId,
                     OwnerName = await _context.Customers.FromSqlRaw(sql_customer, vehicle.OwnerId).Select(c => c.FirstName).FirstOrDefaultAsync()
-                    //Owner = new CustomerDTO
-                    //{
-                    //    CustomerId = vehicle.Owner.CustomerId,
-                    //    FirstName = vehicle.Owner.FirstName,
-                    //    LastName = vehicle.Owner.LastName,
-                    //    Email = vehicle.Owner.Email,
-                    //    Phone = vehicle.Owner.Phone,
-                    //    Address = vehicle.Owner.Address
-                    //}
-                };
+                                    };
                 ViewBag.ActivateLayout = 0;
                 return View(vehicleDTO);
             }
-            catch
+            catch(Exception ex) 
             {
-                return View("Error");
+                ViewBag.ActivateLayout = 2;
+                return View("Error",ex);
             }
         }
 
@@ -338,15 +309,12 @@ ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstNam
         {
             try
             {
-                if (id == null)
-                {
-                    return NotFound();
-                }
+                //if (id == null)
+                //{
+                //    return NotFound();
+                //}
 
-                //var vehicle = await _context.Vehicles
-                //    .Include(v => v.Owner)
-                //    .FirstOrDefaultAsync(m => m.VehicleId == id);
-
+               
                 if (!VehicleExists(id))
                 {
                     return NotFound();
@@ -354,11 +322,17 @@ ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstNam
 
                 await _context.Database.ExecuteSqlRawAsync($"DELETE FROM Vehicles WHERE VehicleId = {id}");
 
-                return RedirectToAction(nameof(Index));
+                if (VehicleExists(id))
+                {
+                    return NotFound();
+                }
+
+                return Redirect($"/Home/Index?userid={userid}");
             }
-            catch
+            catch(Exception ex)
             {
-                return View("Error");
+                ViewBag.ActivateLayout = 2;
+                return View("Error",ex);
             }
         }
 

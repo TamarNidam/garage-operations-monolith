@@ -15,14 +15,9 @@ namespace Garage_Management.Controllers
 
         public IActionResult Index(int? userid)
         {
-            if (userid == 0)
-            {
+          
                 ViewBag.ActivateLayout = 0;
-            }
-            else
-            {
-                ViewBag.ActivateLayout = 0;
-            }
+            
             return View();
         }
 
