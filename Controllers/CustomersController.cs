@@ -53,29 +53,19 @@ namespace Garage_Management.Controllers
                                                    
                         }).ToList();
                 var customerDTOs = customerDTOsTasks.Where(dto => dto != null).ToList();
-
+                ViewBag.ActivateLayout = 0;
                 return View(customerDTOs);
             }
             catch
             {
+                ViewBag.ActivateLayout = 2;
                 return View("Error");
             }
         }
 
         // GET: Customers/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            
-                               
-
-                //var viewModel = new CustomerViewModel
-                //{
-                //    Customer = customer,
-                //    Vehicles = vehicles
-                //};
-
-                //return View(viewModel);
-            
+        public async Task<IActionResult> Details(int userid, int? id)
+        {         
             try
             {
                 if (id == null)
@@ -84,10 +74,18 @@ namespace Garage_Management.Controllers
                 }
 
                 var customer = await _context.Customers
-                    .FirstOrDefaultAsync(m => m.CustomerId == id);
+                .FromSqlRaw("SELECT TOP 1 * FROM Customers WHERE CustomerId = {0}", id)
+                .FirstOrDefaultAsync();
+
                 if (customer == null)
                 {
                     return NotFound();
+                }
+                Permission permission = _context.Permissions.FirstOrDefault(p =>
+               p.UserId == userid && p.CustomerId == id);
+                if (permission == null)
+                {
+                    return null;
                 }
                 var customerDTO = new CustomerDTO
                 {
@@ -96,31 +94,15 @@ namespace Garage_Management.Controllers
                     LastName = customer.LastName,
                     Email = customer.Email,
                     Phone = customer.Phone,
-                    Address = customer.Address
+                    Address = customer.Address,
+                    CanEdit = (bool)permission.CanEdit
                 };
-
-//var vehicles = await _context.Vehicles.Where(v => v.OwnerId == id).ToList();
-//                var vehicleDTOs = vehicles
-//                        .Select(v => new VehicleDTO
-//                        {
-//                           VehicleId
-//                           Make
-//                           Model
-//                           Year
-//                           Vin
-//                           Mileage
-//                           LastServiceDate
-//                        }).ToList();
-
-//                var viewModel = new CustomerVehiclesDTO
-//              {
-//                    Customer = customerDTO,
-//                    Vehicles = vehicles
- //               };
+                ViewBag.ActivateLayout = 0;
                 return View(customerDTO);
             }
             catch
             {
+                ViewBag.ActivateLayout = 2;
                 return View("Error");
             }
         }
@@ -128,6 +110,7 @@ namespace Garage_Management.Controllers
         // GET: Customers/Create
         public IActionResult Create()
         {
+            ViewBag.ActivateLayout = 0;
             return View();
         }
 
@@ -136,23 +119,57 @@ namespace Garage_Management.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CustomerId,FirstName,LastName,Email,Phone,Address")] CustomerDTO customerDTO)
+        public async Task<IActionResult> Create(int userid, [Bind("CustomerId,FirstName,LastName,Email,Phone,Address")] CustomerDTO customerDTO)
         {
             try
-            { 
-            if (ModelState.IsValid)
             {
+                if (ModelState.IsValid)
+                {
+                    var c = await _context.Customers
+                .FromSqlRaw("SELECT TOP 1 * FROM Customers WHERE Email = {0}", customerDTO.Email)
+                .FirstOrDefaultAsync();
+                    if (c != null)
+                    {
+                        ViewBag.ActivateLayout = 0;
+                        ViewBag.ErrorMessage = "Customer Email exist";
+                        return View(customerDTO);
+                    }
                     var maxCustomerId = await _context.Customers.MaxAsync(c => (int?)c.CustomerId) ?? 0;
                     var newCustomerId = maxCustomerId + 1;
                     var sql = $"INSERT INTO [Customers] (CustomerId,FirstName,LastName,Email,Phone,Address) VALUES ({newCustomerId}, '{customerDTO.FirstName}', '{customerDTO.LastName}', '{customerDTO.Email}', '{customerDTO.Phone}', '{customerDTO.Address}')";
                     await _context.Database.ExecuteSqlRawAsync(sql);
-                    return RedirectToAction(nameof(Index));
+
+                    var maxPermissionId = await _context.Permissions.MaxAsync(m => (int?)m.PermissionId) ?? 0;
+                    var users = await _context.Users.ToListAsync();
+                    foreach (var user in users)
+                    {
+                        maxPermissionId = maxPermissionId + 1;
+                        var nPermission = new Permission
+                        {
+                            PermissionId = maxPermissionId,
+                            UserId = user.UserId,
+                            CustomerId = newCustomerId,
+                            CanView = false,
+                            CanEdit = false
+                        };
+                        if (user.UserId == 0)
+                        {
+                            nPermission.CanView = true;
+                            nPermission.CanEdit = true;
+                        }
+                        _context.Permissions.Add(nPermission);
+
+                    }
+                    await _context.SaveChangesAsync();
+                    return Redirect($"/Customers/Index?userid={userid}");
+                }
+                ViewBag.ActivateLayout = 0;
+                return View(customerDTO);
             }
-            return View(customerDTO);
-            }
-            catch
+            catch(Exception ex)
             {
-                return View("Error");
+                ViewBag.ActivateLayout = 2;
+                return View("Error",ex);
             }
         }
 
@@ -173,6 +190,7 @@ namespace Garage_Management.Controllers
             {
                 return NotFound();
             }
+
                 var customerDTO = new CustomerDTO
                 {
                     CustomerId = customer.CustomerId,
@@ -182,40 +200,41 @@ namespace Garage_Management.Controllers
                     Phone = customer.Phone,
                     Address = customer.Address
                 };
-
+                ViewBag.ActivateLayout = 0;
                 return View(customerDTO);
             }
             catch
             {
+                ViewBag.ActivateLayout = 2;
                 return View("Error");
             }
         }
 
         // POST: Customers/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int userid,int id, [Bind("CustomerId,FirstName,LastName,Email,Phone,Address")] CustomerDTO customerDTO)
+        public async Task<IActionResult> Edit(int userid,int id, [Bind("CustomerId,FirstName,LastName,Email,Phone,Address,CanView,CanEdit")] CustomerDTO customerDTO)
         {
             try
             {
-                if (id != customerDTO.CustomerId)
-                {
-                    return NotFound();
-                }
+                //if (id != customerDTO.CustomerId)
+                //{
+                //    return NotFound();
+                //}
 
                 if (ModelState.IsValid)
                 {
                     var sql = $"UPDATE [Customers] SET FirstName = '{customerDTO.FirstName}',LastName = '{customerDTO.LastName}',Email = '{customerDTO.Email}',Phone = '{customerDTO.Phone}',Address = '{customerDTO.Address}' WHERE CustomerId = {customerDTO.CustomerId}";
                     await _context.Database.ExecuteSqlRawAsync(sql);
 
-                    return RedirectToAction(nameof(Index));
+                    return Redirect($"/Customers/Index?userid={userid}");
                 }
+                ViewBag.ActivateLayout = 0;
                 return View(customerDTO);
             }
-            catch
+            catch (Exception ex)
             {
+                ViewBag.ActivateLayout = 2;
                 return View("Error");
             }
         }
@@ -245,28 +264,66 @@ namespace Garage_Management.Controllers
                 Address = customer.Address
             };
 
-            return View(customerDTO);
+            var vehicles = _context.Vehicles.Where(v => v.OwnerId == id).ToList();
+            var vehicleDTOs = vehicles
+                    .Select(v => new VehicleDTO
+                    {
+                           VehicleId= v.VehicleId,
+                           Make = v.Make,
+                           Model = v.Model,
+                           Year = v.Year,
+                           Vin = v.Vin,
+                           Mileage = v.Mileage,
+                           LastServiceDate = v.LastServiceDate,
+                        OwnerId = v.OwnerId,
+                        OwnerName = customer.FirstName
+                    }).ToList();
+
+            var viewModel = new CustomerVehiclesDTO
+            {
+                Customer = customerDTO,
+                Vehicles = vehicleDTOs
+            };
+
+            return View(viewModel);
         }
 
         // POST: Customers/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int userid, int id)
         {
             try
-            { 
-            var customer = await _context.Customers.FindAsync(id);
-            if (customer != null)
             {
-                _context.Customers.Remove(customer);
-            }
+                if (id == 0)
+                {
+                    return NotFound();
+                }
+                if (!CustomerExists(id))
+                {
+                    ViewBag.ActivateLayout = 2;
+                    return View("Error"); 
+                }
+                var sql = $"DELETE [Permissions] WHERE CustomerId = {id}";
+                await _context.Database.ExecuteSqlRawAsync(sql);
+                sql = $"DELETE [Vehicles] WHERE OwnerId = { id }";
+                await _context.Database.ExecuteSqlRawAsync(sql);
+                 sql = $"DELETE [Customers] WHERE CustomerId = {id}";
+                await _context.Database.ExecuteSqlRawAsync(sql);
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+                if (CustomerExists(id))
+                {
+                    ViewBag.ActivateLayout = 2;
+                    return View("Error");
+                }
+                
+
+                return Redirect($"/Customers/Index?userid={0}");
             }
-            catch
+            catch (Exception ex)
             {
-                return View("Error");
+                ViewBag.ActivateLayout = 2;
+                return View("Error",ex);
             }
         }
 

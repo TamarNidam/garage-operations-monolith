@@ -3,6 +3,10 @@
 @{
     ViewData["Title"] = "Create";
 }
+@if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+{
+    <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
+}
 @using Microsoft.AspNetCore.Http
 @{
     int userid = Convert.ToInt32(Context.Request.Query["userid"]);

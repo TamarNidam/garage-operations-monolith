@@ -1,4 +1,4 @@
-﻿@model Garage_Management.DTO.CustomerDTO
+﻿@model Garage_Management.DTO.CustomerVehiclesDTO
 
 @{
     ViewData["Title"] = "Delete";
@@ -16,41 +16,103 @@
     <h4>Customer</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FirstName)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Customer.CustomerId)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FirstName)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Customer.CustomerId)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LastName)
+            @Html.DisplayNameFor(model => model.Customer.FirstName)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LastName)
+            @Html.DisplayFor(model => model.Customer.FirstName)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Email)
+            @Html.DisplayNameFor(model => model.Customer.LastName)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Email)
+            @Html.DisplayFor(model => model.Customer.LastName)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Phone)
+            @Html.DisplayNameFor(model => model.Customer.Email)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Phone)
+            @Html.DisplayFor(model => model.Customer.Email)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Address)
+            @Html.DisplayNameFor(model => model.Customer.Phone)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Address)
+            @Html.DisplayFor(model => model.Customer.Phone)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Customer.Address)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Customer.Address)
         </dd>
     </dl>
-    
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="CustomerId" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index" asp-route-userid="@userid">Back to List</a>
+    <h2>Vehicles</h2>
+    @if (Model.Vehicles.Count > 0)
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        Make
+                    </th>
+                    <th>
+                        Model
+                    </th>
+                    <th>
+                        Year
+                    </th>
+                    <th>
+                        Vin
+                    </th>
+                    <th>
+                        Mileage
+
+                    </th>
+                    <th>
+                        LastServiceDate
+                                     </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Vehicles)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Make)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Model)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Year)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Vin)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Mileage)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.LastServiceDate)
+                        </td>
+                       
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    <form asp-action="Delete" asp-route-userid="@userid" asp-route-id="@Model.Customer.CustomerId">
+        <input type="hidden" asp-for="Customer.CustomerId" />
+        <input type="submit" value="Delete" class="btn btn-danger" /> 
+        
     </form>
+    <a asp-action="Index" asp-route-userid="@userid">Back to List</a>
 </div>

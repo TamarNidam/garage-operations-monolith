@@ -179,11 +179,11 @@ namespace Garage_Management.Controllers
                     await _context.Database.ExecuteSqlRawAsync(sql);
 
                     var maxPermissionId = await _context.Permissions.MaxAsync(m => (int?)m.PermissionId) ?? 0;
-                    
+
                     var customers = await _context.Customers.ToListAsync();
                     foreach (var customer in customers)
                     {
-                         maxPermissionId = maxPermissionId + 1;
+                        maxPermissionId = maxPermissionId + 1;
                         var negativePermission = new Permission
                         {
                             PermissionId = maxPermissionId,
@@ -212,7 +212,7 @@ namespace Garage_Management.Controllers
                         };
                         _context.GaragePermissions.Add(gPermission);
                     }
-                        await _context.SaveChangesAsync();
+                    await _context.SaveChangesAsync();
 
                     return Redirect($"/Users/Index?userid={userid}");
                     //return RedirectToAction(nameof(Index));
@@ -279,8 +279,7 @@ namespace Garage_Management.Controllers
                     var sql = $"UPDATE [Users] SET Username = '{userDTO.Username}', Password = '{userDTO.Password}' WHERE UserId = {userDTO.UserId}";
                     await _context.Database.ExecuteSqlRawAsync(sql);
                     return Redirect($"/Users/Index?userid={userid}");
-                   //return RedirectToAction(nameof(Index));
-                }
+                                   }
 
                 ViewBag.ActivateLayout = 0;
                 return View(userDTO);
@@ -332,7 +331,7 @@ namespace Garage_Management.Controllers
         {
             try
             {
-                if (id == null)
+                if (id == 0)
                 {
                     return NotFound();
                 }

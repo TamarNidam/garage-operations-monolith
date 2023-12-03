@@ -14,7 +14,7 @@
 @if(userid == 0)
 {
     <p>
-    <a asp-action="Create">Create New</a>
+        <a asp-action="Create" asp-route-userid="@userid">Create New</a>
 </p>
 }
 
@@ -50,6 +50,7 @@
                     {
                         <a asp-action="Details" asp-route-userid="@userid" asp-route-id="@item.CustomerId">Details</a> 
                     }
+                    <p></p>
                     @if(userid == 0)
                     {
                         <a asp-action="Delete" asp-route-userid="@userid" asp-route-id="@item.CustomerId">Delete</a>
