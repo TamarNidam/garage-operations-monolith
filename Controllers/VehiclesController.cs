@@ -161,7 +161,7 @@ ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstNam
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("VehicleId,Make,Model,Year,Vin,Mileage,LastServiceDate,OwnerId,OwnerName")] VehicleDTO vehicleDTO)
         {
-            //var sql1 = "INSERT INTO [Vehicles] (VehicleId, Make, Model, Year, Vin, Mileage, LastServiceDate, OwnerId) VALUES (1, 'Toyota', 'Camry', 2022, 'ABC123XYZ789', 50000, '2023-11-26', 1)";
+           
             
             try
             {
