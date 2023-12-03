@@ -21,7 +21,7 @@ namespace Garage_Management.Controllers
             }
             else
             {
-                ViewBag.ActivateLayout = 1;
+                ViewBag.ActivateLayout = 0;
             }
             return View();
         }

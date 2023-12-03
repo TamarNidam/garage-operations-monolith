@@ -13,14 +13,17 @@
 {
    <p>
         <a asp-action="Create" asp-route-userid="@userid" asp-route-id="@id">Create New</a>
-</p> 
-}
-@if (userid == 0)
+    </p>
+}else
+{
+   @if (userid == 0)
 {
     <p>
         <a asp-action="Create" asp-route-userid="@userid">Create New</a>
     </p>
+} 
 }
+
 
 <table class="table">
     <thead>
@@ -31,18 +34,18 @@
             <th>
                 @Html.DisplayNameFor(model => model.Model)
             </th>
-            <th>
+            @* <th>
                 @Html.DisplayNameFor(model => model.Year)
-            </th>
+            </th> *@
             <th>
                 @Html.DisplayNameFor(model => model.Vin)
             </th>
-            <th>
+          @*   <th>
                 @Html.DisplayNameFor(model => model.Mileage)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.LastServiceDate)
-            </th>
+            </th> *@
             <th>
                 @Html.DisplayNameFor(model => model.OwnerName)
             </th>
@@ -58,25 +61,33 @@
             <td>
                 @Html.DisplayFor(modelItem => item.Model)
             </td>
-            <td>
+           @*  <td>
                 @Html.DisplayFor(modelItem => item.Year)
-            </td>
+            </td> *@
             <td>
                 @Html.DisplayFor(modelItem => item.Vin)
             </td>
-            <td>
+           @*  <td>
                 @Html.DisplayFor(modelItem => item.Mileage)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.LastServiceDate)
-            </td>
+            </td> *@
             <td>
                     @Html.DisplayFor(modelItem => item.OwnerName)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-userid="" asp-route-id="@item.VehicleId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.VehicleId">Details</a> |
+                    @if (ViewBag.ifCanEdit)
+                    {
+                <a asp-action="Edit" asp-route-userid="" asp-route-id="@item.VehicleId">Edit</a> 
+                <p></p>
                 <a asp-action="Delete" asp-route-id="@item.VehicleId">Delete</a>
+                  <p></p>  }
+                    
+                    @if (ViewBag.ifCanView)
+                    {
+                <a asp-action="Details" asp-route-id="@item.VehicleId">Details</a> 
+                    }
             </td>
         </tr>
 }

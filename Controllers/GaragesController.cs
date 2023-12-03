@@ -42,7 +42,7 @@ namespace Garage_Management.Controllers
             }
             catch (Exception ex)
             {
-                return RedirectToAction("Error"); ;
+                return View("Error", ex); ;
             }
         
            

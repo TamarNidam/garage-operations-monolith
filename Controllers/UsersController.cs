@@ -25,8 +25,7 @@ namespace Garage_Management.Controllers
         // GET: Users
         public async Task<IActionResult> Index(int? userid)
         {
-           
-            try
+                       try
             {
                 string sql;
                 if (userid == 0)

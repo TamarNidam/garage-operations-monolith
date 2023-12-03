@@ -54,7 +54,9 @@ namespace Garage_Management.Controllers
                 if(id == null)
                 {
                     ViewBag.ifCanEdit = false;
+                    ViewBag.ifCanView = false;
                 }
+             
                 else
                 {
 var caneditSql = $"SELECT * FROM [Permissions] WHERE UserId = {userid} AND CustomerId = {id}";
@@ -68,6 +70,14 @@ var caneditSql = $"SELECT * FROM [Permissions] WHERE UserId = {userid} AND Custo
                 {
                     ViewBag.ifCanEdit = false;
                 }
+                if(canedit.CanView == true)
+                    {
+                        ViewBag.ifCanView = true;
+                    }
+                    else
+                    {
+                        ViewBag.ifCanView = false;
+                    }
                 }
                 
                 ViewBag.ActivateLayout = 0;
@@ -155,58 +165,41 @@ ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstNam
         }
 
         // POST: Vehicles/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
+         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("VehicleId,Make,Model,Year,Vin,Mileage,LastServiceDate,OwnerId,OwnerName")] VehicleDTO vehicleDTO)
+        public async Task<IActionResult> Create(int userid, [Bind("VehicleId,Make,Model,Year,Vin,Mileage,LastServiceDate,OwnerId,OwnerName")] VehicleDTO vehicleDTO)
         {
-           
-            
-            try
+                       try
             {
                 if (ModelState.IsValid)
                 {
+                    var u = await _context.Vehicles
+                .FromSqlRaw("SELECT TOP 1 * FROM Vehicles WHERE Vin = {0}", vehicleDTO.Vin)
+                .FirstOrDefaultAsync();
+                    if (u != null)
+                    {
+                        ViewBag.ActivateLayout = 0;
+                        ViewBag.ErrorMessage = "VIN exist";
+                        return View(vehicleDTO);
+                    }
+
                     var maxVehicleId = await _context.Vehicles.MaxAsync(v => (int?)v.VehicleId) ?? 0;
                     var newVehicleId = maxVehicleId + 1;
                     var sql = $"INSERT INTO [Vehicles] (VehicleId, Make, Model, Year, Vin, Mileage, LastServiceDate, OwnerId) VALUES ({newVehicleId}, '{vehicleDTO.Make}', '{vehicleDTO.Model}', {vehicleDTO.Year}, '{vehicleDTO.Vin}', {vehicleDTO.Mileage}, '{vehicleDTO.LastServiceDate}' ,{vehicleDTO.OwnerId})";
                     await _context.Database.ExecuteSqlRawAsync(sql);
-
-               //     var vehicle = await _context.Vehicles
-               //.Include(v => v.Owner)
-               //.FirstOrDefaultAsync(m => m.VehicleId == newVehicleId);
-
-                    //if (vehicle != null)
-                    //{
-                    //    vehicleDTO.Owner = new CustomerDTO
-                    //    {
-                    //        CustomerId = vehicle.Owner.CustomerId,
-                    //        FirstName = vehicle.Owner.FirstName,
-                    //        LastName = vehicle.Owner.LastName,
-                    //        Email = vehicle.Owner.Email,
-                    //        Phone = vehicle.Owner.Phone,
-                    //        Address = vehicle.Owner.Address
-                    //    };
-                    //}
-
-                    //                var owner = await _context.Customers
-                    //.FromSqlRaw(sql_customer, vehicleDTO.OwnerId)
-                    //.FirstOrDefaultAsync();
-
-                    //                vehicleDTO.Owner = owner;
-
-                    return RedirectToAction(nameof(Index));
+                    
+                    return Redirect($"/Vehicles/Index?userid={userid}");
                 }
 
-                
+ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstName", vehicleDTO.OwnerId);
 
-                ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstName", vehicleDTO.OwnerId);
+                
                 ViewBag.ActivateLayout = 0;
                 return View(vehicleDTO);
             }
             catch (Exception ex)
             {
-                return RedirectToAction(nameof(Error));
+                return View("error", ex);
             }
         }
 

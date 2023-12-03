@@ -85,7 +85,7 @@ namespace Garage_Management.Controllers
                p.UserId == userid && p.CustomerId == id);
                 if (permission == null)
                 {
-                    return null;
+                    return NotFound();
                 }
                 var customerDTO = new CustomerDTO
                 {
@@ -235,7 +235,7 @@ namespace Garage_Management.Controllers
             catch (Exception ex)
             {
                 ViewBag.ActivateLayout = 2;
-                return View("Error");
+                return View("Error",ex);
             }
         }
 

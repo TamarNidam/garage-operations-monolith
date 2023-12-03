@@ -3,6 +3,11 @@
 @{
     ViewData["Title"] = "Create";
 }
+@using Microsoft.AspNetCore.Http
+@{
+    int? userid = Convert.ToInt32(Context.Request.Query["userid"]);
+    int? id = Convert.ToInt32(Context.Request.Query["id"]);
+}
 @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
 {
     <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
@@ -14,7 +19,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
+        <form asp-action="Create" asp-route-userid="@userid">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Make" class="control-label"></label>
@@ -54,7 +59,7 @@
                 }
                 else
                 {
-                    <input type="text" class="form-control" readonly value='@ViewData["OwnerId"]' />
+                    <input asp-for="OwnerId" type="text" class="form-control" readonly value='@ViewData["OwnerId"]' />
                     <span asp-validation-for="OwnerId" class="text-danger"></span>
                 }
             </div>
