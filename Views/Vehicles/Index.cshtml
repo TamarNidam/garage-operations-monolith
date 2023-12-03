@@ -3,12 +3,25 @@
 @{
     ViewData["Title"] = "Index";
 }
-
+@using Microsoft.AspNetCore.Http
+@{
+    int userid = Convert.ToInt32(Context.Request.Query["userid"]);
+    int? id = Convert.ToInt32(Context.Request.Query["id"]);
+}
 <h1>Vehicles</h1>
+@if (ViewBag.ifCanEdit)
+{
+   <p>
+        <a asp-action="Create" asp-route-userid="@userid" asp-route-id="@id">Create New</a>
+</p> 
+}
+@if (userid == 0)
+{
+    <p>
+        <a asp-action="Create" asp-route-userid="@userid">Create New</a>
+    </p>
+}
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
 <table class="table">
     <thead>
         <tr>
@@ -61,7 +74,7 @@
                     @Html.DisplayFor(modelItem => item.OwnerName)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.VehicleId">Edit</a> |
+                <a asp-action="Edit" asp-route-userid="" asp-route-id="@item.VehicleId">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.VehicleId">Details</a> |
                 <a asp-action="Delete" asp-route-id="@item.VehicleId">Delete</a>
             </td>

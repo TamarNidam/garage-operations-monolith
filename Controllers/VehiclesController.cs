@@ -23,11 +23,20 @@ namespace Garage_Management.Controllers
         }
 
         // GET: Vehicles
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int userid, int? id)
         {
             try
             {
-                var sql = "SELECT * FROM Vehicles";
+                string sql;
+                if(id == null)
+                {
+ sql = "SELECT * FROM Vehicles";
+                
+                }
+                else
+                {
+                    sql = $"SELECT * FROM Vehicles WHERE OwnerId = {id}";
+                }
                 var Vehicles = await _context.Vehicles.FromSqlRaw(sql).ToListAsync();
                 var vehicleDTOs = Vehicles
                     .Select(async v => new VehicleDTO
@@ -41,25 +50,33 @@ namespace Garage_Management.Controllers
                         LastServiceDate = v.LastServiceDate,
                         OwnerId = v.OwnerId,
                         OwnerName = await _context.Customers.FromSqlRaw(sql_customer, v.OwnerId).Select(c => c.FirstName).FirstOrDefaultAsync()
-                        //Owner = await _context.Customers
-                        //    .FromSqlRaw(sql_customer, v.OwnerId)
-                        //    .FirstOrDefaultAsync()
-                        //Owner = new CustomerDTO
-                        //{
-                        //    CustomerId = v.Owner.CustomerId,
-                        //    FirstName = v.Owner.FirstName,
-                        //    LastName = v.Owner.LastName,
-                        //    Email = v.Owner.Email,
-                        //    Phone = v.Owner.Phone,
-                        //    Address = v.Owner.Address
-                        //}
-                    }).Select(t => t.Result).ToList();
-
+                                     }).Select(t => t.Result).ToList();
+                if(id == null)
+                {
+                    ViewBag.ifCanEdit = false;
+                }
+                else
+                {
+var caneditSql = $"SELECT * FROM [Permissions] WHERE UserId = {userid} AND CustomerId = {id}";
+                var canedit = await _context.Permissions.FromSqlInterpolated($"SELECT * FROM [Permissions] WHERE UserId = {userid} AND CustomerId = {id}").FirstOrDefaultAsync();
+                 
+                if (canedit.CanEdit == true)
+                {
+                    ViewBag.ifCanEdit = true; 
+                }
+                else
+                {
+                    ViewBag.ifCanEdit = false;
+                }
+                }
+                
+                ViewBag.ActivateLayout = 0;
                 return View(vehicleDTOs);
             }
-            catch 
+            catch (Exception ex)
             {
-                return View("Error");
+                ViewBag.ActivateLayout = 2;
+                return View("Error",ex);
             }
         }
 
@@ -105,20 +122,35 @@ namespace Garage_Management.Controllers
                     //    Address = vehicle.Owner.Address
                     //}
                 };
-
+                ViewBag.ActivateLayout = 0;
                 return View(vehicleDTO);
             }
-            catch
+            catch(Exception ex)
             {
-                return View("Error");
+                ViewBag.ActivateLayout = 2;
+                return View("Error",ex);
             }
         }
             
 
         // GET: Vehicles/Create
-        public IActionResult Create()
+        public IActionResult Create(int userid, int? id)
         {
-            ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstName");
+            if(id == null)
+            {
+ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstName");
+            }
+            else
+            {
+                var customer = _context.Customers.FirstOrDefault(c => c.CustomerId == id);
+
+                if (customer != null)
+                {
+                    ViewData["OwnerId"] = customer.FirstName;
+                }
+                
+            }
+            ViewBag.ActivateLayout = 0;
             return View();
         }
 
@@ -169,6 +201,7 @@ namespace Garage_Management.Controllers
                 
 
                 ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstName", vehicleDTO.OwnerId);
+                ViewBag.ActivateLayout = 0;
                 return View(vehicleDTO);
             }
             catch (Exception ex)
@@ -215,11 +248,11 @@ namespace Garage_Management.Controllers
                     //}
                 };
                 ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstName", vehicle.OwnerId);
+                ViewBag.ActivateLayout = 0;
                 return View(vehicleDTO);
             }
-            catch
-            {
-                return View("Error");
+            catch(Exception ex) { 
+                return View("Error",ex);
             }
         }
 
@@ -245,10 +278,12 @@ namespace Garage_Management.Controllers
                     return RedirectToAction(nameof(Index));
                 }
                 ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstName", vehicleDTO.OwnerId);
+                ViewBag.ActivateLayout = 0;
                 return View(vehicleDTO);
             }
             catch
             {
+                ViewBag.ActivateLayout = 2;
                 return View("Error");
             }
         }
@@ -294,7 +329,7 @@ namespace Garage_Management.Controllers
                     //    Address = vehicle.Owner.Address
                     //}
                 };
-
+                ViewBag.ActivateLayout = 0;
                 return View(vehicleDTO);
             }
             catch
