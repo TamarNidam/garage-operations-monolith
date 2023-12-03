@@ -45,11 +45,13 @@
                     {
                         <a asp-action="Delete" asp-route-userid="@userid" asp-route-id="@item.UserId">Delete</a>
                     }
-                    @* |
-                    @if (userid == id)
+                   
+                    @if (userid == item.UserId)
                     {
-                        <a asp-action="Edit" asp-route-id="@item.UserId">Edit</a>
-                    } *@
+                        <a asp-action="Edit" asp-route-userid="@userid" asp-route-id="@item.UserId">Edit</a>
+                    } 
+                   <p></p>
+                    <a asp-controller="Permissions" asp-action="index" asp-route-userid="@userid" asp-route-id="@item.UserId">Permissions</a>
                 </td>
             </tr>
         }

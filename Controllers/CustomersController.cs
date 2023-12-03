@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Garage_Management.Models;
 using Garage_Management.DTO;
 using System.Net;
+using Humanizer;
+
 
 namespace Garage_Management.Controllers
 {
@@ -21,22 +23,36 @@ namespace Garage_Management.Controllers
         }
 
         // GET: Customers
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int userid)
         {
             try
             {
                 var sql = "SELECT * FROM [Customers]";
                 var customers = await _context.Customers.FromSqlRaw(sql).ToListAsync();
-                var customerDTOs = customers
-                        .Select(c => new CustomerDTO
+
+                var customerDTOsTasks = customers
+                        .Select( c =>
                         {
-                            CustomerId = c.CustomerId,
-                            FirstName = c.FirstName,
-                            LastName = c.LastName,
-                            Email = c.Email,
-                            Phone = c.Phone,
-                            Address = c.Address
+                            Permission permission = _context.Permissions.FirstOrDefault(p =>
+                p.UserId == userid && p.CustomerId == c.CustomerId);
+                            if (permission == null)
+                            {
+                                return null;
+                            }
+                            return new CustomerDTO
+                            {
+                                CustomerId = c.CustomerId,
+                                FirstName = c.FirstName,
+                                LastName = c.LastName,
+                                Email = c.Email,
+                                Phone = c.Phone,
+                                Address = c.Address,
+                                CanView = (bool)permission.CanView,
+                                CanEdit = (bool)permission.CanEdit
+                                           };
+                                                   
                         }).ToList();
+                var customerDTOs = customerDTOsTasks.Where(dto => dto != null).ToList();
 
                 return View(customerDTOs);
             }
@@ -49,6 +65,17 @@ namespace Garage_Management.Controllers
         // GET: Customers/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+            
+                               
+
+                //var viewModel = new CustomerViewModel
+                //{
+                //    Customer = customer,
+                //    Vehicles = vehicles
+                //};
+
+                //return View(viewModel);
+            
             try
             {
                 if (id == null)
@@ -71,6 +98,25 @@ namespace Garage_Management.Controllers
                     Phone = customer.Phone,
                     Address = customer.Address
                 };
+
+//var vehicles = await _context.Vehicles.Where(v => v.OwnerId == id).ToList();
+//                var vehicleDTOs = vehicles
+//                        .Select(v => new VehicleDTO
+//                        {
+//                           VehicleId
+//                           Make
+//                           Model
+//                           Year
+//                           Vin
+//                           Mileage
+//                           LastServiceDate
+//                        }).ToList();
+
+//                var viewModel = new CustomerVehiclesDTO
+//              {
+//                    Customer = customerDTO,
+//                    Vehicles = vehicles
+ //               };
                 return View(customerDTO);
             }
             catch
@@ -150,7 +196,7 @@ namespace Garage_Management.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("CustomerId,FirstName,LastName,Email,Phone,Address")] CustomerDTO customerDTO)
+        public async Task<IActionResult> Edit(int userid,int id, [Bind("CustomerId,FirstName,LastName,Email,Phone,Address")] CustomerDTO customerDTO)
         {
             try
             {

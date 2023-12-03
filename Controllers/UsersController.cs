@@ -25,7 +25,8 @@ namespace Garage_Management.Controllers
         // GET: Users
         public async Task<IActionResult> Index(int? userid)
         {
-          try
+           
+            try
             {
                 string sql;
                 if (userid == 0)
@@ -176,6 +177,42 @@ namespace Garage_Management.Controllers
                     var sql = $"INSERT INTO [Users] (UserId, Username, Password) VALUES ({newUserId}, '{userDTO.Username}', '{userDTO.Password}')";
 
                     await _context.Database.ExecuteSqlRawAsync(sql);
+
+                    var maxPermissionId = await _context.Permissions.MaxAsync(m => (int?)m.PermissionId) ?? 0;
+                    
+                    var customers = await _context.Customers.ToListAsync();
+                    foreach (var customer in customers)
+                    {
+                         maxPermissionId = maxPermissionId + 1;
+                        var negativePermission = new Permission
+                        {
+                            PermissionId = maxPermissionId,
+                            UserId = newUserId,
+                            CustomerId = customer.CustomerId,
+                            CanView = false,
+                            CanEdit = false
+                        };
+                        _context.Permissions.Add(negativePermission);
+
+                    }
+
+                    var maxG_PermissionId = await _context.Permissions.MaxAsync(m => (int?)m.PermissionId) ?? 0;
+
+                    var garages = await _context.Garages.ToListAsync();
+                    foreach (var garage in garages)
+                    {
+                        maxG_PermissionId = maxG_PermissionId + 1;
+                        var gPermission = new GaragePermission
+                        {
+                            PermissionId = maxG_PermissionId,
+                            UserId = newUserId,
+                            GarageId = garage.GarageId,
+                            CanView = false,
+                            CanEdit = false
+                        };
+                        _context.GaragePermissions.Add(gPermission);
+                    }
+                        await _context.SaveChangesAsync();
 
                     return Redirect($"/Users/Index?userid={userid}");
                     //return RedirectToAction(nameof(Index));

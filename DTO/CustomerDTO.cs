@@ -26,6 +26,8 @@ public class CustomerDTO
     public string Phone { get; set; }
 
     public string Address { get; set; }
+    public bool CanView { get; set; } = false;
+    public bool CanEdit { get; set; } = false;
 
     public static implicit operator CustomerDTO?(Customer? v)
     {
