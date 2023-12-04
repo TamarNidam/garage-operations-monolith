@@ -1,27 +1,28 @@
 ﻿@model IEnumerable<Garage_Management.DTO.GarageDTO>
-
+@using Microsoft.AspNetCore.Http
+@{
+    int userid = Convert.ToInt32(Context.Request.Query["userid"]);
+    int? id = Convert.ToInt32(Context.Request.Query["id"]);
+}
 @{
     ViewData["Title"] = "Index";
 }
 
 <h1>Index</h1>
+@if (userid == 0)
+{
+    <p>
+        <a asp-action="Create">Create New</a>
+    </p>
+}
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
 <table class="table">
     <thead>
         <tr>
             <th>
                 @Html.DisplayNameFor(model => model.GarageName)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Address)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PhoneNumber)
-            </th>
-            <th></th>
+           
         </tr>
     </thead>
     <tbody>
@@ -30,16 +31,24 @@
             <td>
                 @Html.DisplayFor(modelItem => item.GarageName)
             </td>
+            
             <td>
-                @Html.DisplayFor(modelItem => item.Address)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PhoneNumber)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.GarageId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.GarageId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.GarageId">Delete</a>
+                    @if (item.CanEdit)
+                    {
+                        <a asp-action="Edit" asp-route-userid="@userid" asp-route-id="@item.GarageId">Edit</a>
+
+                    }
+                    <p></p>
+                    @if (item.CanView)
+                    {
+                        <a asp-action="Details" asp-route-userid="@userid" asp-route-id="@item.GarageId">Details</a>
+
+                    }
+                    <p></p>
+                    @if (userid == 0)
+                    {
+                        <a asp-action="Delete" asp-route-userid="@userid" asp-route-id="@item.GarageId">Delete</a>
+                    }
             </td>
         </tr>
 }

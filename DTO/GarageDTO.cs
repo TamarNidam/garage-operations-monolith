@@ -16,6 +16,8 @@ namespace Garage_Management.DTO
 
         [StringLength(15)]
         public string PhoneNumber { get; set; }
+        public bool CanView { get; set; } = false;
+        public bool CanEdit { get; set; } = false;
 
         public ICollection<GaragePermissionDTO> GaragePermissions { get; set; } = new List<GaragePermissionDTO>();
 

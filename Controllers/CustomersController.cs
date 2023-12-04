@@ -95,7 +95,8 @@ namespace Garage_Management.Controllers
                     Email = customer.Email,
                     Phone = customer.Phone,
                     Address = customer.Address,
-                    CanEdit = (bool)permission.CanEdit
+                    CanEdit = (bool)permission.CanEdit,
+                    CanView = (bool)permission.CanView
                 };
                 ViewBag.ActivateLayout = 0;
                 return View(customerDTO);
@@ -285,6 +286,7 @@ namespace Garage_Management.Controllers
                 Vehicles = vehicleDTOs
             };
 
+            ViewBag.ActivateLayout = 0;
             return View(viewModel);
         }
 

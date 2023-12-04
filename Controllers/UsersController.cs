@@ -25,7 +25,9 @@ namespace Garage_Management.Controllers
         // GET: Users
         public async Task<IActionResult> Index(int? userid)
         {
-                       try
+        //    var sql1 = $"INSERT INTO [Garage] (GarageId,GarageName,Address,PhoneNumber) VALUES (0, 'g1', 'rrr', '0542456')";
+        //    await _context.Database.ExecuteSqlRawAsync(sql1);
+            try
             {
                 string sql;
                 if (userid == 0)

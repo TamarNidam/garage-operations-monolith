@@ -9,7 +9,9 @@ namespace Garage_Management.DTO
     {
         public int VisitId { get; set; }
         public int? CustomerId { get; set; }
+        public string? CustomerName { get; set; }
         public int? GarageId { get; set; }
+        public string? GarageName { get; set; }
         public DateOnly? VisitDate { get; set; }
         public string ServiceDescription { get; set; }
         public decimal? TotalCost { get; set; }

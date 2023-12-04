@@ -5,31 +5,30 @@ public class VehicleDTO
 {
     public int VehicleId { get; set; }
 
-    //[RegularExpression(@"^[A-Za-z\s]+$", ErrorMessage = "Invalid Make")]
+    [RegularExpression(@"^[A-Za-z\s]+$", ErrorMessage = "Invalid Make")]
     [Required(ErrorMessage = "Make is required")]
     [StringLength(50)]
     public required string Make { get; set; }
 
-    //[RegularExpression(@"^[A-Za-z0-9]+$", ErrorMessage = "Invalid Make")]
+    [RegularExpression(@"^[A-Za-z0-9]+$", ErrorMessage = "Invalid Make")]
     [Required(ErrorMessage = "Model is required")]
     [StringLength(50)]
     public string Model { get; set; }
 
-    //[RegularExpression(@"^\d{4}$", ErrorMessage = "Invalid Year")]
+    [RegularExpression(@"^\d{4}$", ErrorMessage = "Invalid Year")]
     public int? Year { get; set; }
 
-    //[RegularExpression(@"^[A-HJ-NPR-Z\d]{17}$", ErrorMessage = "Invalid VIN")]
+    [RegularExpression(@"^[A-HJ-NPR-Z\d]{17}$", ErrorMessage = "Invalid VIN")]
     [StringLength(17)]
     public required string Vin { get; set; }
 
-    //[RegularExpression(@"^\d+$", ErrorMessage = "Invalid Mileage")]
+    [RegularExpression(@"^\d+$", ErrorMessage = "Invalid Mileage")]
     public int? Mileage { get; set; }
 
     public DateOnly? LastServiceDate { get; set; }
 
     public int? OwnerId { get; set; }
 
-    //public required CustomerDTO Owner { get; set; }
     public  string? OwnerName { get; set; }
     
 }

@@ -3,6 +3,11 @@
 @{
     ViewData["Title"] = "Details";
 }
+@using Microsoft.AspNetCore.Http
+@{
+    int userid = Convert.ToInt32(Context.Request.Query["userid"]);
+    int? id = Convert.ToInt32(Context.Request.Query["id"]);
+}
 
 <h1>Details</h1>
 
@@ -10,6 +15,12 @@
     <h4>Garage</h4>
     <hr />
     <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.GarageId)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.GarageId)
+        </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.GarageName)
         </dt>
@@ -28,9 +39,19 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.PhoneNumber)
         </dd>
+        <dt class="col-sm-2">
+            Visits
+        </dt>
+        <dd class="col-sm-10">
+            <a asp-controller="GarageVisits" asp-action="Index" asp-route-userid="@userid" asp-route-id="@Model?.GarageId">Visits</a>
+        </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.GarageId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    @if (Model.CanEdit)
+    {
+        <a asp-action="Edit" asp-route-userid="@userid" asp-route-id="@Model?.GarageId">Edit</a>
+    
+    }
+    <a asp-action="Index" asp-route-userid="@userid">Back to List</a>
 </div>
