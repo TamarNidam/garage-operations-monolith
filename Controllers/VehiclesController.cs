@@ -153,11 +153,11 @@ ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstNam
         }
 
         // POST: Vehicles/Create
-         [HttpPost]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(int userid,int? id ,[Bind("VehicleId,Make,Model,Year,Vin,Mileage,LastServiceDate,OwnerId,OwnerName")] VehicleDTO vehicleDTO)
+        public async Task<IActionResult> Create(int userid, int? id, [Bind("VehicleId,Make,Model,Year,Vin,Mileage,LastServiceDate,OwnerId,OwnerName")] VehicleDTO vehicleDTO)
         {
-                       try
+            try
             {
                 if (ModelState.IsValid)
                 {
@@ -175,13 +175,13 @@ ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstNam
                     var newVehicleId = maxVehicleId + 1;
                     var sql = $"INSERT INTO [Vehicles] (VehicleId, Make, Model, Year, Vin, Mileage, LastServiceDate, OwnerId) VALUES ({newVehicleId}, '{vehicleDTO.Make}', '{vehicleDTO.Model}', {vehicleDTO.Year}, '{vehicleDTO.Vin}', {vehicleDTO.Mileage}, '{vehicleDTO.LastServiceDate}' ,{vehicleDTO.OwnerId})";
                     await _context.Database.ExecuteSqlRawAsync(sql);
-                    
+
                     return Redirect($"/Vehicles/Index?userid={userid}");
                 }
 
-ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstName", vehicleDTO.OwnerId);
+                ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstName", vehicleDTO.OwnerId);
 
-                
+
                 ViewBag.ActivateLayout = 0;
                 return View(vehicleDTO);
             }
@@ -291,14 +291,14 @@ ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstNam
                     LastServiceDate = vehicle.LastServiceDate,
                     OwnerId = vehicle.OwnerId,
                     OwnerName = await _context.Customers.FromSqlRaw(sql_customer, vehicle.OwnerId).Select(c => c.FirstName).FirstOrDefaultAsync()
-                                    };
+                };
                 ViewBag.ActivateLayout = 0;
                 return View(vehicleDTO);
             }
-            catch(Exception ex) 
+            catch (Exception ex)
             {
                 ViewBag.ActivateLayout = 2;
-                return View("Error",ex);
+                return View("Error", ex);
             }
         }
 
@@ -314,8 +314,7 @@ ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstNam
                 //    return NotFound();
                 //}
 
-               
-                if (!VehicleExists(id))
+                               if (!VehicleExists(id))
                 {
                     return NotFound();
                 }

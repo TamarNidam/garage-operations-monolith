@@ -41,7 +41,10 @@
                             </li>
                             <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-route-userid="@userid" asp-controller="Vehicles" asp-action="Index">Vehicles</a>
-                        </li>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-route-userid="@userid" asp-controller="GarageVisits" asp-action="Index">Garage Visits</a>
+                            </li>
                         }
                             else
                             {
@@ -58,9 +61,7 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-route-userid="@userid" asp-controller="Customers" asp-action="Index">Customers</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-route-userid="@userid" asp-controller="GarageVisits" asp-action="Index">Garage Visits</a>
-                        </li>
+                        
                     </ul>
                 </div>
             </div>

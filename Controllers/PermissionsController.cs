@@ -6,12 +6,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Garage_Management.Models;
+using Garage_Management.DTO;
 
 namespace Garage_Management.Controllers
 {
     public class PermissionsController : Controller
     {
-        private readonly Garage_ManagementContext _context;
+private readonly Garage_ManagementContext _context;
 
         public PermissionsController(Garage_ManagementContext context)
         {
@@ -21,6 +22,7 @@ namespace Garage_Management.Controllers
         // GET: Permissions
         public async Task<IActionResult> Index()
         {
+
             var garage_ManagementContext = _context.Permissions.Include(p => p.Customer).Include(p => p.User);
             return View(await garage_ManagementContext.ToListAsync());
         }
