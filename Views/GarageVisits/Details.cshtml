@@ -1,4 +1,4 @@
-﻿@model Garage_Management.Models.GarageVisit
+﻿@model Garage_Management.DTO.GarageVisitDTO
 
 @{
     ViewData["Title"] = "Details";
@@ -10,6 +10,12 @@
     <h4>GarageVisit</h4>
     <hr />
     <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.VisitId)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.VisitId)
+        </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.VisitDate)
         </dt>
@@ -29,20 +35,20 @@
             @Html.DisplayFor(model => model.TotalCost)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Customer)
+            @Html.DisplayNameFor(model => model.CustomerName)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Customer.FirstName)
+            @Html.DisplayFor(model => model.CustomerName)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Garage)
+            @Html.DisplayNameFor(model => model.GarageName)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Garage.GarageName)
+            @Html.DisplayFor(model => model.GarageName)
         </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.VisitId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    @* <a asp-action="Edit" asp-route-id="@Model?.VisitId">Edit</a> |
+    <a asp-action="Index">Back to List</a> *@
 </div>

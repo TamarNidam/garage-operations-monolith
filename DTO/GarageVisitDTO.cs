@@ -15,7 +15,6 @@ namespace Garage_Management.DTO
         public DateOnly? VisitDate { get; set; }
         public string ServiceDescription { get; set; }
         public decimal? TotalCost { get; set; }
-        public virtual Customer Customer { get; set; }
-        public virtual Garage Garage { get; set; }
+        
     }
 }
