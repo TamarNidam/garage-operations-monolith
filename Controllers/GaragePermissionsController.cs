@@ -6,11 +6,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Garage_Management.Models;
+using Garage_Management.DTO;
 
 namespace Garage_Management.Controllers
 {
     public class GaragePermissionsController : Controller
     {
+        private const string sql_garage = "SELECT * FROM Garage WHERE GarageId = {0}";
+        private const string sql_user = "SELECT * FROM Users WHERE UserId = {0}";
+
         private readonly Garage_ManagementContext _context;
 
         public GaragePermissionsController(Garage_ManagementContext context)
@@ -19,57 +23,80 @@ namespace Garage_Management.Controllers
         }
 
         // GET: GaragePermissions
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int userid, int id)
         {
-            var garage_ManagementContext = _context.GaragePermissions.Include(g => g.Garage).Include(g => g.User);
-            return View(await garage_ManagementContext.ToListAsync());
-        }
-
-        // GET: GaragePermissions/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
+            try
             {
-                return NotFound();
-            }
+                string sql = $"SELECT * FROM GaragePermissions WHERE UserId = {id}";
 
-            var garagePermission = await _context.GaragePermissions
-                .Include(g => g.Garage)
-                .Include(g => g.User)
-                .FirstOrDefaultAsync(m => m.PermissionId == id);
-            if (garagePermission == null)
+                var permissions = await _context.GaragePermissions.FromSqlRaw(sql).ToListAsync();
+                var permissionsDTOs = permissions
+                    .Select(async p => new GaragePermissionDTO
+                    {
+                        PermissionId = p.PermissionId,
+                        UserId = p.UserId,
+                        UserName = await _context.Users.FromSqlRaw(sql_user, p.UserId).Select(c => c.Username).FirstOrDefaultAsync(),
+                        GarageId = p.GarageId,
+                        GarageName = await _context.Garages.FromSqlRaw(sql_garage, p.GarageId).Select(c => c.GarageName).FirstOrDefaultAsync(),
+                        CanView = p.CanView,
+                        CanEdit = p.CanEdit
+                    }).Select(t => t.Result).ToList();
+
+                ViewBag.ActivateLayout = 0;
+                return View(permissionsDTOs);
+            }
+            catch (Exception ex)
             {
-                return NotFound();
+                ViewBag.ActivateLayout = 2;
+                return View("Error", ex);
             }
-
-            return View(garagePermission);
         }
 
-        // GET: GaragePermissions/Create
-        public IActionResult Create()
-        {
-            ViewData["GarageId"] = new SelectList(_context.Garages, "GarageId", "GarageName");
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Password");
-            return View();
-        }
+        //// GET: GaragePermissions/Details/5
+        //public async Task<IActionResult> Details(int? id)
+        //{
+        //    if (id == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-        // POST: GaragePermissions/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("PermissionId,UserId,GarageId,CanView,CanEdit")] GaragePermission garagePermission)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(garagePermission);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["GarageId"] = new SelectList(_context.Garages, "GarageId", "GarageName", garagePermission.GarageId);
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Password", garagePermission.UserId);
-            return View(garagePermission);
-        }
+        //    var garagePermission = await _context.GaragePermissions
+        //        .Include(g => g.Garage)
+        //        .Include(g => g.User)
+        //        .FirstOrDefaultAsync(m => m.PermissionId == id);
+        //    if (garagePermission == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    return View(garagePermission);
+        //}
+
+        //// GET: GaragePermissions/Create
+        //public IActionResult Create()
+        //{
+        //    ViewData["GarageId"] = new SelectList(_context.Garages, "GarageId", "GarageName");
+        //    ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Password");
+        //    return View();
+        //}
+
+        //// POST: GaragePermissions/Create
+        //// To protect from overposting attacks, enable the specific properties you want to bind to.
+        //// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Create([Bind("PermissionId,UserId,GarageId,CanView,CanEdit")] GaragePermission garagePermission)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        _context.Add(garagePermission);
+        //        await _context.SaveChangesAsync();
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    ViewData["GarageId"] = new SelectList(_context.Garages, "GarageId", "GarageName", garagePermission.GarageId);
+        //    ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Password", garagePermission.UserId);
+        //    return View(garagePermission);
+        //}
 
         // GET: GaragePermissions/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -126,40 +153,40 @@ namespace Garage_Management.Controllers
             return View(garagePermission);
         }
 
-        // GET: GaragePermissions/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+        //// GET: GaragePermissions/Delete/5
+        //public async Task<IActionResult> Delete(int? id)
+        //{
+        //    if (id == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            var garagePermission = await _context.GaragePermissions
-                .Include(g => g.Garage)
-                .Include(g => g.User)
-                .FirstOrDefaultAsync(m => m.PermissionId == id);
-            if (garagePermission == null)
-            {
-                return NotFound();
-            }
+        //    var garagePermission = await _context.GaragePermissions
+        //        .Include(g => g.Garage)
+        //        .Include(g => g.User)
+        //        .FirstOrDefaultAsync(m => m.PermissionId == id);
+        //    if (garagePermission == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return View(garagePermission);
-        }
+        //    return View(garagePermission);
+        //}
 
-        // POST: GaragePermissions/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var garagePermission = await _context.GaragePermissions.FindAsync(id);
-            if (garagePermission != null)
-            {
-                _context.GaragePermissions.Remove(garagePermission);
-            }
+        //// POST: GaragePermissions/Delete/5
+        //[HttpPost, ActionName("Delete")]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> DeleteConfirmed(int id)
+        //{
+        //    var garagePermission = await _context.GaragePermissions.FindAsync(id);
+        //    if (garagePermission != null)
+        //    {
+        //        _context.GaragePermissions.Remove(garagePermission);
+        //    }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
+        //    await _context.SaveChangesAsync();
+        //    return RedirectToAction(nameof(Index));
+        //}
 
         private bool GaragePermissionExists(int id)
         {

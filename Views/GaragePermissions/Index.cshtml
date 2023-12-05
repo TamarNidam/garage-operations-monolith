@@ -1,52 +1,52 @@
-﻿@model IEnumerable<Garage_Management.Models.GaragePermission>
+﻿@model IEnumerable<Garage_Management.DTO.GaragePermissionDTO>
 
 @{
     ViewData["Title"] = "Index";
 }
+@using Microsoft.AspNetCore.Http
+@{
+    int userid = Convert.ToInt32(Context.Request.Query["userid"]);
+    int? id = Convert.ToInt32(Context.Request.Query["id"]);
+}
 
-<h1>Index</h1>
+<h1>@Model.First().UserName</h1>
+<h2>Garages Permissions</h2>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
 <table class="table">
     <thead>
         <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.GarageName)
+            </th>
             <th>
                 @Html.DisplayNameFor(model => model.CanView)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.CanEdit)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Garage)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.User)
-            </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
 @foreach (var item in Model) {
-        <tr>
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.GarageName)
+                </td>
             <td>
                 @Html.DisplayFor(modelItem => item.CanView)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.CanEdit)
             </td>
+            
+            
             <td>
-                @Html.DisplayFor(modelItem => item.Garage.GarageName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.User.Password)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.PermissionId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.PermissionId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.PermissionId">Delete</a>
-            </td>
+                    @if (userid == 0 && id != 0)
+                    {
+                        <a asp-action="Edit" asp-route-userid="@userid" asp-route-id="@item.PermissionId">Edit</a>
+                    }
+                    </td>
         </tr>
 }
     </tbody>
