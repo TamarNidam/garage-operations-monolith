@@ -28,10 +28,10 @@ namespace Garage_Management.Controllers
             try
             {
                 string sql;
-                if(id == null)
+                if (id == null)
                 {
- sql = "SELECT * FROM Vehicles";
-                
+                    sql = "SELECT * FROM Vehicles";
+
                 }
                 else
                 {
@@ -50,27 +50,27 @@ namespace Garage_Management.Controllers
                         LastServiceDate = v.LastServiceDate,
                         OwnerId = v.OwnerId,
                         OwnerName = await _context.Customers.FromSqlRaw(sql_customer, v.OwnerId).Select(c => c.FirstName).FirstOrDefaultAsync()
-                                     }).Select(t => t.Result).ToList();
-                if(id == null)
+                    }).Select(t => t.Result).ToList();
+                if (id == null)
                 {
                     ViewBag.ifCanEdit = false;
                     ViewBag.ifCanView = false;
                 }
-             
+
                 else
                 {
-var caneditSql = $"SELECT * FROM [Permissions] WHERE UserId = {userid} AND CustomerId = {id}";
-                var canedit = await _context.Permissions.FromSqlInterpolated($"SELECT * FROM [Permissions] WHERE UserId = {userid} AND CustomerId = {id}").FirstOrDefaultAsync();
-                 
-                if (canedit.CanEdit == true)
-                {
-                    ViewBag.ifCanEdit = true; 
-                }
-                else
-                {
-                    ViewBag.ifCanEdit = false;
-                }
-                if(canedit.CanView == true)
+                    var caneditSql = $"SELECT * FROM [Permissions] WHERE UserId = {userid} AND CustomerId = {id}";
+                    var canedit = await _context.Permissions.FromSqlInterpolated($"SELECT * FROM [Permissions] WHERE UserId = {userid} AND CustomerId = {id}").FirstOrDefaultAsync();
+
+                    if (canedit.CanEdit == true)
+                    {
+                        ViewBag.ifCanEdit = true;
+                    }
+                    else
+                    {
+                        ViewBag.ifCanEdit = false;
+                    }
+                    if (canedit.CanView == true)
                     {
                         ViewBag.ifCanView = true;
                     }
@@ -79,14 +79,14 @@ var caneditSql = $"SELECT * FROM [Permissions] WHERE UserId = {userid} AND Custo
                         ViewBag.ifCanView = false;
                     }
                 }
-                
+
                 ViewBag.ActivateLayout = 0;
                 return View(vehicleDTOs);
             }
             catch (Exception ex)
             {
                 ViewBag.ActivateLayout = 2;
-                return View("Error",ex);
+                return View("Error", ex);
             }
         }
 
@@ -119,24 +119,24 @@ var caneditSql = $"SELECT * FROM [Permissions] WHERE UserId = {userid} AND Custo
                     LastServiceDate = vehicle.LastServiceDate,
                     OwnerId = vehicle.OwnerId,
                     OwnerName = await _context.Customers.FromSqlRaw(sql_customer, vehicle.OwnerId).Select(c => c.FirstName).FirstOrDefaultAsync()
-                                   };
+                };
                 ViewBag.ActivateLayout = 0;
                 return View(vehicleDTO);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ViewBag.ActivateLayout = 2;
-                return View("Error",ex);
+                return View("Error", ex);
             }
         }
-            
+
 
         // GET: Vehicles/Create
         public IActionResult Create(int userid, int? id)
         {
-            if(id == null)
+            if (id == null)
             {
-ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstName");
+                ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstName");
             }
             else
             {
@@ -146,7 +146,7 @@ ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstNam
                 {
                     ViewData["OwnerId"] = customer.FirstName;
                 }
-                
+
             }
             ViewBag.ActivateLayout = 0;
             return View();
@@ -314,7 +314,7 @@ ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstNam
                 //    return NotFound();
                 //}
 
-                               if (!VehicleExists(id))
+                if (!VehicleExists(id))
                 {
                     return NotFound();
                 }
@@ -328,10 +328,10 @@ ViewData["OwnerId"] = new SelectList(_context.Customers, "CustomerId", "FirstNam
 
                 return Redirect($"/Home/Index?userid={userid}");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ViewBag.ActivateLayout = 2;
-                return View("Error",ex);
+                return View("Error", ex);
             }
         }
 

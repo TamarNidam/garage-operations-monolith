@@ -25,8 +25,7 @@ namespace Garage_Management.Controllers
         // GET: Users
         public async Task<IActionResult> Index(int? userid)
         {
-        //    var sql1 = $"INSERT INTO [Garage] (GarageId,GarageName,Address,PhoneNumber) VALUES (0, 'g1', 'rrr', '0542456')";
-        //    await _context.Database.ExecuteSqlRawAsync(sql1);
+            
             try
             {
                 string sql;
@@ -118,10 +117,6 @@ namespace Garage_Management.Controllers
                 if (ModelState.IsValid)
                 {
                     var sql = "SELECT UserId, Username, Password FROM [Users] WHERE Username = {0} AND Password = {1}";
-
-                    //var usernameParameter = new SqlParameter("@Username", userDTO.Username);
-                    //var passwordParameter = new SqlParameter("@Password", userDTO.Password);
-
                     var user = await _context.Users.FromSqlRaw(sql, userDTO.Username, userDTO.Password)
                         .FirstOrDefaultAsync();
 
@@ -139,7 +134,7 @@ namespace Garage_Management.Controllers
                 ViewBag.ActivateLayout = 2;
                 return View(userDTO);
             }
-            catch 
+            catch
             {
                 ViewBag.ActivateLayout = 2;
                 return View("Error");
@@ -216,7 +211,7 @@ namespace Garage_Management.Controllers
                     await _context.SaveChangesAsync();
 
                     return Redirect($"/Users/Index?userid={userid}");
-                    //return RedirectToAction(nameof(Index));
+
                 }
 
                 ViewBag.ActivateLayout = 0;
@@ -266,7 +261,7 @@ namespace Garage_Management.Controllers
         // POST: Users/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int userid,int id, [Bind("UserId,Username,Password")] UserDTO userDTO)
+        public async Task<IActionResult> Edit(int userid, int id, [Bind("UserId,Username,Password")] UserDTO userDTO)
         {
             try
             {
@@ -280,7 +275,7 @@ namespace Garage_Management.Controllers
                     var sql = $"UPDATE [Users] SET Username = '{userDTO.Username}', Password = '{userDTO.Password}' WHERE UserId = {userDTO.UserId}";
                     await _context.Database.ExecuteSqlRawAsync(sql);
                     return Redirect($"/Users/Index?userid={userid}");
-                                   }
+                }
 
                 ViewBag.ActivateLayout = 0;
                 return View(userDTO);
@@ -297,7 +292,7 @@ namespace Garage_Management.Controllers
         {
             try
             {
-                if (id == null )
+                if (id == null)
                 {
                     return NotFound();
                 }

@@ -49,8 +49,7 @@ namespace Garage_Management.Controllers
                         VisitDate = v.VisitDate,
                         ServiceDescription = v.ServiceDescription,
                         TotalCost = v.TotalCost
-                        //CanEdit = await _context.GaragePermissions.FromSqlRaw(sql_permission, userid, v.GarageId).Select(c => c.CanEdit).FirstOrDefaultAsync()
-                    }).Select(t => t.Result).ToList();
+                           }).Select(t => t.Result).ToList();
                 if (id != null)
                 {
 
@@ -91,7 +90,6 @@ namespace Garage_Management.Controllers
         }
 
 
-
         // GET: GarageVisits/Details/5
         public async Task<IActionResult> Details(int userid, int? id)
         {
@@ -130,6 +128,8 @@ namespace Garage_Management.Controllers
             }
         }
 
+
+
         // GET: GarageVisits/Create
         public IActionResult Create(int userid, int? id)
         {
@@ -151,6 +151,7 @@ namespace Garage_Management.Controllers
             ViewBag.ActivateLayout = 0;
             return View();
         }
+
 
         // POST: GarageVisits/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -181,6 +182,8 @@ namespace Garage_Management.Controllers
 
             }
         }
+
+
 
         // GET: GarageVisits/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -220,6 +223,8 @@ namespace Garage_Management.Controllers
             }
         }
 
+
+
         // POST: GarageVisits/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
@@ -252,6 +257,8 @@ namespace Garage_Management.Controllers
                 return View("Error");
             }
         }
+
+
 
         // GET: GarageVisits/Delete/5
         public async Task<IActionResult> Delete(int? id)

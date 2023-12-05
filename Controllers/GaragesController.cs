@@ -26,7 +26,7 @@ namespace Garage_Management.Controllers
             try
             {
                 var sql = "SELECT * FROM [Garage]";
-                var garages =await _context.Garages.FromSqlRaw(sql).ToListAsync();
+                var garages = await _context.Garages.FromSqlRaw(sql).ToListAsync();
                 var garageDTOs1 = await Task.WhenAll(garages
                         .Select(async g =>
                         {
@@ -48,16 +48,15 @@ namespace Garage_Management.Controllers
                         }));
                 var garageDTOs = garageDTOs1.Where(dto => dto != null).ToList();
                 ViewBag.ActivateLayout = 0;
-                return View(garageDTOs); 
-                //return View(await _context.Garages.ToListAsync());
+                return View(garageDTOs);
             }
             catch (Exception ex)
             {
                 ViewBag.ActivateLayout = 2;
                 return View("Error", ex); ;
             }
-        
-           
+
+
         }
 
         // GET: Garages/Details/5
@@ -65,21 +64,19 @@ namespace Garage_Management.Controllers
         {
             try
             {
+                if (id == null)
+                {
+                    return NotFound();
+                }
 
-           
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var garage = await _context.Garages
-                .FromSqlRaw("SELECT TOP 1 * FROM Garage WHERE GarageId = {0}", id)
-                .FirstOrDefaultAsync();
+                var garage = await _context.Garages
+                    .FromSqlRaw("SELECT TOP 1 * FROM Garage WHERE GarageId = {0}", id)
+                    .FirstOrDefaultAsync();
 
                 if (garage == null)
-            {
-                return NotFound();
-            }
+                {
+                    return NotFound();
+                }
 
                 GaragePermission permission = _context.GaragePermissions.FirstOrDefault(p =>
                                p.UserId == userid && p.GarageId == id);
@@ -99,18 +96,21 @@ namespace Garage_Management.Controllers
                 ViewBag.ActivateLayout = 0;
                 return View(garageDTO);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ViewBag.ActivateLayout = 2;
-                return View("Error",ex);
+                return View("Error", ex);
             }
         }
+
+
         // GET: Garages/Create
         public IActionResult Create()
         {
             ViewBag.ActivateLayout = 0;
             return View();
         }
+
 
         // POST: Garages/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -174,25 +174,26 @@ namespace Garage_Management.Controllers
         // GET: Garages/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            try { 
-            if (id == null)
+            try
             {
-                return NotFound();
-            }
+                if (id == null)
+                {
+                    return NotFound();
+                }
 
                 var sql = $"SELECT GarageId,GarageName,Address,PhoneNumber FROM [Garage] WHERE GarageId = {id}";
                 var garage = await _context.Garages.FromSqlRaw(sql).FirstOrDefaultAsync();
 
                 if (garage == null)
-            {
-                return NotFound();
-            }
+                {
+                    return NotFound();
+                }
                 var garageDTO = new GarageDTO
                 {
                     GarageId = garage.GarageId,
                     GarageName = garage.GarageName,
                     Address = garage.Address,
-                    PhoneNumber = garage.PhoneNumber                    
+                    PhoneNumber = garage.PhoneNumber
                 };
                 ViewBag.ActivateLayout = 0;
                 return View(garageDTO);
@@ -213,7 +214,6 @@ namespace Garage_Management.Controllers
         {
             try
             {
-
                 // if (id != garage.GarageId)
                 //{
                 //    return NotFound();
@@ -221,7 +221,6 @@ namespace Garage_Management.Controllers
 
                 if (ModelState.IsValid)
                 {
-
                     var sql = $"UPDATE [Garage] SET GarageName = '{garageDTO.GarageName}',Address = '{garageDTO.Address}',PhoneNumber = '{garageDTO.PhoneNumber}' WHERE GarageId = {garageDTO.GarageId}";
                     await _context.Database.ExecuteSqlRawAsync(sql);
 
@@ -236,6 +235,7 @@ namespace Garage_Management.Controllers
                 return View("Error", ex);
             }
         }
+
 
         // GET: Garages/Delete/5
         public async Task<IActionResult> Delete(int? id)

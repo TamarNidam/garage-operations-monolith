@@ -31,7 +31,7 @@ namespace Garage_Management.Controllers
                 var customers = await _context.Customers.FromSqlRaw(sql).ToListAsync();
 
                 var customerDTOsTasks = customers
-                        .Select( c =>
+                        .Select(c =>
                         {
                             Permission permission = _context.Permissions.FirstOrDefault(p =>
                 p.UserId == userid && p.CustomerId == c.CustomerId);
@@ -49,8 +49,8 @@ namespace Garage_Management.Controllers
                                 Address = c.Address,
                                 CanView = (bool)permission.CanView,
                                 CanEdit = (bool)permission.CanEdit
-                                           };
-                                                   
+                            };
+
                         }).ToList();
                 var customerDTOs = customerDTOsTasks.Where(dto => dto != null).ToList();
                 ViewBag.ActivateLayout = 0;
@@ -63,9 +63,10 @@ namespace Garage_Management.Controllers
             }
         }
 
+
         // GET: Customers/Details/5
         public async Task<IActionResult> Details(int userid, int? id)
-        {         
+        {
             try
             {
                 if (id == null)
@@ -108,6 +109,8 @@ namespace Garage_Management.Controllers
             }
         }
 
+
+
         // GET: Customers/Create
         public IActionResult Create()
         {
@@ -115,9 +118,9 @@ namespace Garage_Management.Controllers
             return View();
         }
 
+
+
         // POST: Customers/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(int userid, [Bind("CustomerId,FirstName,LastName,Email,Phone,Address")] CustomerDTO customerDTO)
@@ -167,12 +170,13 @@ namespace Garage_Management.Controllers
                 ViewBag.ActivateLayout = 0;
                 return View(customerDTO);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ViewBag.ActivateLayout = 2;
-                return View("Error",ex);
+                return View("Error", ex);
             }
         }
+
 
         // GET: Customers/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -180,17 +184,16 @@ namespace Garage_Management.Controllers
             try
             {
                 if (id == null)
-            {
-                return NotFound();
-            }
-
+                {
+                    return NotFound();
+                }
                 var sql = $"SELECT CustomerId,FirstName,LastName,Email,Phone,Address FROM [Customers] WHERE CustomerId = {id}";
                 var customer = await _context.Customers.FromSqlRaw(sql).FirstOrDefaultAsync();
 
                 if (customer == null)
-            {
-                return NotFound();
-            }
+                {
+                    return NotFound();
+                }
 
                 var customerDTO = new CustomerDTO
                 {
@@ -211,10 +214,11 @@ namespace Garage_Management.Controllers
             }
         }
 
+
         // POST: Customers/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int userid,int id, [Bind("CustomerId,FirstName,LastName,Email,Phone,Address,CanView,CanEdit")] CustomerDTO customerDTO)
+        public async Task<IActionResult> Edit(int userid, int id, [Bind("CustomerId,FirstName,LastName,Email,Phone,Address,CanView,CanEdit")] CustomerDTO customerDTO)
         {
             try
             {
@@ -236,9 +240,11 @@ namespace Garage_Management.Controllers
             catch (Exception ex)
             {
                 ViewBag.ActivateLayout = 2;
-                return View("Error",ex);
+                return View("Error", ex);
             }
         }
+
+
 
         // GET: Customers/Delete/5
         public async Task<IActionResult> Delete(int? id)
@@ -269,13 +275,13 @@ namespace Garage_Management.Controllers
             var vehicleDTOs = vehicles
                     .Select(v => new VehicleDTO
                     {
-                           VehicleId= v.VehicleId,
-                           Make = v.Make,
-                           Model = v.Model,
-                           Year = v.Year,
-                           Vin = v.Vin,
-                           Mileage = v.Mileage,
-                           LastServiceDate = v.LastServiceDate,
+                        VehicleId = v.VehicleId,
+                        Make = v.Make,
+                        Model = v.Model,
+                        Year = v.Year,
+                        Vin = v.Vin,
+                        Mileage = v.Mileage,
+                        LastServiceDate = v.LastServiceDate,
                         OwnerId = v.OwnerId,
                         OwnerName = customer.FirstName
                     }).ToList();
@@ -289,6 +295,7 @@ namespace Garage_Management.Controllers
             ViewBag.ActivateLayout = 0;
             return View(viewModel);
         }
+
 
         // POST: Customers/Delete/5
         [HttpPost, ActionName("Delete")]
@@ -304,13 +311,13 @@ namespace Garage_Management.Controllers
                 if (!CustomerExists(id))
                 {
                     ViewBag.ActivateLayout = 2;
-                    return View("Error"); 
+                    return View("Error");
                 }
                 var sql = $"DELETE [Permissions] WHERE CustomerId = {id}";
                 await _context.Database.ExecuteSqlRawAsync(sql);
-                sql = $"DELETE [Vehicles] WHERE OwnerId = { id }";
+                sql = $"DELETE [Vehicles] WHERE OwnerId = {id}";
                 await _context.Database.ExecuteSqlRawAsync(sql);
-                 sql = $"DELETE [Customers] WHERE CustomerId = {id}";
+                sql = $"DELETE [Customers] WHERE CustomerId = {id}";
                 await _context.Database.ExecuteSqlRawAsync(sql);
 
                 if (CustomerExists(id))
@@ -318,14 +325,14 @@ namespace Garage_Management.Controllers
                     ViewBag.ActivateLayout = 2;
                     return View("Error");
                 }
-                
+
 
                 return Redirect($"/Customers/Index?userid={0}");
             }
             catch (Exception ex)
             {
                 ViewBag.ActivateLayout = 2;
-                return View("Error",ex);
+                return View("Error", ex);
             }
         }
 

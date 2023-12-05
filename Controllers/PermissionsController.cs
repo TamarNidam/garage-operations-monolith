@@ -52,69 +52,22 @@ namespace Garage_Management.Controllers
                 return View("Error", ex);
             }
         }
-    
 
-        //// GET: Permissions/Details/5
-        //public async Task<IActionResult> Details(int? id)
-        //{
-        //    if (id == null)
-        //    {
-        //        return NotFound();
-        //    }
 
-        //    var permission = await _context.Permissions
-        //        .Include(p => p.Customer)
-        //        .Include(p => p.User)
-        //        .FirstOrDefaultAsync(m => m.PermissionId == id);
-        //    if (permission == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return View(permission);
-        //}
-
-        //// GET: Permissions/Create
-        //public IActionResult Create()
-        //{
-        //    ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "FirstName");
-        //    ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Password");
-        //    return View();
-        //}
-
-        //// POST: Permissions/Create
-        //// To protect from overposting attacks, enable the specific properties you want to bind to.
-        //// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Create([Bind("PermissionId,UserId,CustomerId,CanView,CanEdit")] Permission permission)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        _context.Add(permission);
-        //        await _context.SaveChangesAsync();
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "FirstName", permission.CustomerId);
-        //    ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Password", permission.UserId);
-        //    return View(permission);
-        //}
-
-        // GET: Permissions/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             try
-            { 
-            if (id == null)
             {
-                return NotFound();
-            }
+                if (id == null)
+                {
+                    return NotFound();
+                }
                 var sql = $"SELECT * FROM [Permissions] WHERE PermissionId = {id}";
                 var cpermission = await _context.Permissions.FromSqlRaw(sql).FirstOrDefaultAsync();
                 if (cpermission == null)
-            {
-                return NotFound();
-            }
+                {
+                    return NotFound();
+                }
                 var permission = new CustomerPermissionDTO
                 {
                     PermissionId = cpermission.PermissionId,
@@ -167,40 +120,6 @@ namespace Garage_Management.Controllers
             }
         }
 
-        //// GET: Permissions/Delete/5
-        //public async Task<IActionResult> Delete(int? id)
-        //{
-        //    if (id == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    var permission = await _context.Permissions
-        //        .Include(p => p.Customer)
-        //        .Include(p => p.User)
-        //        .FirstOrDefaultAsync(m => m.PermissionId == id);
-        //    if (permission == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return View(permission);
-        //}
-
-        //// POST: Permissions/Delete/5
-        //[HttpPost, ActionName("Delete")]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> DeleteConfirmed(int id)
-        //{
-        //    var permission = await _context.Permissions.FindAsync(id);
-        //    if (permission != null)
-        //    {
-        //        _context.Permissions.Remove(permission);
-        //    }
-
-        //    await _context.SaveChangesAsync();
-        //    return RedirectToAction(nameof(Index));
-        //}
 
         private bool PermissionExists(int id)
         {

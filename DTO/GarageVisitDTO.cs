@@ -12,6 +12,8 @@ namespace Garage_Management.DTO
         public string? CustomerName { get; set; }
         public int? GarageId { get; set; }
         public string? GarageName { get; set; }
+
+        [RegularExpression(@"^\d{4}-\d{2}-\d{2}$", ErrorMessage = "Invalid Date.(YYYY-MM-DD)")]
         public DateOnly? VisitDate { get; set; }
         public string ServiceDescription { get; set; }
         public decimal? TotalCost { get; set; }

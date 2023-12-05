@@ -14,7 +14,7 @@ namespace Garage_Management.Controllers
     {
         private const string sql_garage = "SELECT * FROM Garage WHERE GarageId = {0}";
         private const string sql_user = "SELECT * FROM Users WHERE UserId = {0}";
-                private readonly Garage_ManagementContext _context;
+        private readonly Garage_ManagementContext _context;
 
         public GaragePermissionsController(Garage_ManagementContext context)
         {
@@ -42,7 +42,7 @@ namespace Garage_Management.Controllers
                     }).Select(t => t.Result).ToList();
 
                 ViewBag.ActivateLayout = 0;
-                 return View(permissionsDTOs);
+                return View(permissionsDTOs);
             }
             catch (Exception ex)
             {
@@ -51,53 +51,7 @@ namespace Garage_Management.Controllers
             }
         }
 
-        //// GET: GaragePermissions/Details/5
-        //public async Task<IActionResult> Details(int? id)
-        //{
-        //    if (id == null)
-        //    {
-        //        return NotFound();
-        //    }
 
-        //    var garagePermission = await _context.GaragePermissions
-        //        .Include(g => g.Garage)
-        //        .Include(g => g.User)
-        //        .FirstOrDefaultAsync(m => m.PermissionId == id);
-        //    if (garagePermission == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return View(garagePermission);
-        //}
-
-        //// GET: GaragePermissions/Create
-        //public IActionResult Create()
-        //{
-        //    ViewData["GarageId"] = new SelectList(_context.Garages, "GarageId", "GarageName");
-        //    ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Password");
-        //    return View();
-        //}
-
-        //// POST: GaragePermissions/Create
-        //// To protect from overposting attacks, enable the specific properties you want to bind to.
-        //// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Create([Bind("PermissionId,UserId,GarageId,CanView,CanEdit")] GaragePermission garagePermission)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        _context.Add(garagePermission);
-        //        await _context.SaveChangesAsync();
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    ViewData["GarageId"] = new SelectList(_context.Garages, "GarageId", "GarageName", garagePermission.GarageId);
-        //    ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Password", garagePermission.UserId);
-        //    return View(garagePermission);
-        //}
-
-        // GET: GaragePermissions/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             try
@@ -122,7 +76,7 @@ namespace Garage_Management.Controllers
                     CanView = garagePermission.CanView,
                     CanEdit = garagePermission.CanEdit
                 };
-                //ViewData["CAN"] = new SelectList(_context.Garages, "GarageId", "GarageName", garagePermission.GarageId);
+
                 ViewBag.ActivateLayout = 0;
                 return View(permission);
             }
@@ -134,8 +88,6 @@ namespace Garage_Management.Controllers
         }
 
         // POST: GaragePermissions/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int userid, int id, [Bind("PermissionId,UserId,GarageId,CanView,CanEdit")] GaragePermissionDTO garagePermissionDTO)
@@ -158,47 +110,13 @@ namespace Garage_Management.Controllers
                 ViewBag.ActivateLayout = 0;
                 return View(garagePermissionDTO);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ViewBag.ActivateLayout = 2;
-                return View("Error",ex);
+                return View("Error", ex);
             }
         }
 
-        //// GET: GaragePermissions/Delete/5
-        //public async Task<IActionResult> Delete(int? id)
-        //{
-        //    if (id == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    var garagePermission = await _context.GaragePermissions
-        //        .Include(g => g.Garage)
-        //        .Include(g => g.User)
-        //        .FirstOrDefaultAsync(m => m.PermissionId == id);
-        //    if (garagePermission == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return View(garagePermission);
-        //}
-
-        //// POST: GaragePermissions/Delete/5
-        //[HttpPost, ActionName("Delete")]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> DeleteConfirmed(int id)
-        //{
-        //    var garagePermission = await _context.GaragePermissions.FindAsync(id);
-        //    if (garagePermission != null)
-        //    {
-        //        _context.GaragePermissions.Remove(garagePermission);
-        //    }
-
-        //    await _context.SaveChangesAsync();
-        //    return RedirectToAction(nameof(Index));
-        //}
 
         private bool GaragePermissionExists(int id)
         {

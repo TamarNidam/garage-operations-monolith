@@ -17,34 +17,30 @@ namespace Garage_Management.Controllers
             _logger = logger;
         }
 
-        //public HomeController(ILogger<HomeController> logger)
-        //{
-        //    _logger = logger;
-        //}
-
         public IActionResult Index(int? userid)
         {
-          
-                ViewBag.ActivateLayout = 0;
-            
+
+            ViewBag.ActivateLayout = 0;
+
             return View();
         }
-        public async Task<IActionResult> Privacy(int userid, int?id)
+
+
+        public async Task<IActionResult> Privacy(int userid, int? id)
         {
             try
             {
                 string sql;
                 if (userid == 0)
                 {
-                    if(id == null)
+                    if (id == null)
                     {
-sql = "SELECT * FROM [Users]";
+                        sql = "SELECT * FROM [Users]";
                     }
                     else
                     {
                         sql = $"SELECT * FROM [Users] WHERE UserId= {id}";
                     }
-                    
                 }
                 else
                 {
@@ -62,10 +58,10 @@ sql = "SELECT * FROM [Users]";
                 ViewBag.ActivateLayout = 0;
                 return View(userDTOs);
             }
-            catch(Exception ex) 
+            catch (Exception ex)
             {
                 ViewBag.ActivateLayout = 2;
-                return View("Error",ex);
+                return View("Error", ex);
             }
 
         }
