@@ -14,8 +14,7 @@ namespace Garage_Management.Controllers
     {
         private const string sql_garage = "SELECT * FROM Garage WHERE GarageId = {0}";
         private const string sql_user = "SELECT * FROM Users WHERE UserId = {0}";
-
-        private readonly Garage_ManagementContext _context;
+                private readonly Garage_ManagementContext _context;
 
         public GaragePermissionsController(Garage_ManagementContext context)
         {

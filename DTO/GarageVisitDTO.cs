@@ -15,7 +15,7 @@ namespace Garage_Management.DTO
         public DateOnly? VisitDate { get; set; }
         public string ServiceDescription { get; set; }
         public decimal? TotalCost { get; set; }
-        public bool? CanEdit { get; set; }
+        public bool? CanEdit { get; set; } = false;
 
     }
 }

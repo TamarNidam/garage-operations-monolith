@@ -44,36 +44,5 @@
             </tbody>
         </table>
 
-        @* <table class="table">
-        <thead>
-        <tr>
-        <th>
-        @Html.DisplayNameFor(model => model.UserName)
-        </th>
-
-        <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var item in Model)
-        {
-        <tr>
-
-        <td>
-        @Html.DisplayFor(modelItem => item.UserName)
-        </td>
-
-        <td>
-
-
-        @if (userid == 0)
-        {
-        <a asp-action="Edit" asp-route-userid="@userid" asp-route-id="@item.UserId">Edit</a>
-        }
-        </td>
-        </tr>
-        }
-        </tbody>
-        </table> *@
     </div>
 </div>

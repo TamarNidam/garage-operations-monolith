@@ -103,19 +103,36 @@ namespace Garage_Management.Controllers
         // GET: Permissions/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+            try
+            { 
             if (id == null)
             {
                 return NotFound();
             }
-
-            var permission = await _context.Permissions.FindAsync(id);
-            if (permission == null)
+                var sql = $"SELECT * FROM [Permissions] WHERE PermissionId = {id}";
+                var cpermission = await _context.Permissions.FromSqlRaw(sql).FirstOrDefaultAsync();
+                if (cpermission == null)
             {
                 return NotFound();
             }
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "FirstName", permission.CustomerId);
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Password", permission.UserId);
-            return View(permission);
+                var permission = new CustomerPermissionDTO
+                {
+                    PermissionId = cpermission.PermissionId,
+                    UserId = cpermission.UserId,
+                    UserName = await _context.Users.FromSqlRaw(sql_user, cpermission.UserId).Select(c => c.Username).FirstOrDefaultAsync(),
+                    CustomerId = cpermission.CustomerId,
+                    CustomerName = await _context.Customers.FromSqlRaw(sql_customer, cpermission.CustomerId).Select(c => c.FirstName).FirstOrDefaultAsync(),
+                    CanView = cpermission.CanView,
+                    CanEdit = cpermission.CanEdit
+                };
+                ViewBag.ActivateLayout = 0;
+                return View(permission);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ActivateLayout = 2;
+                return View("Error", ex);
+            }
         }
 
         // POST: Permissions/Edit/5
@@ -123,36 +140,31 @@ namespace Garage_Management.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("PermissionId,UserId,CustomerId,CanView,CanEdit")] Permission permission)
+        public async Task<IActionResult> Edit(int userid, int id, [Bind("PermissionId,UserId,CustomerId,CanView,CanEdit")] CustomerPermissionDTO customerPermissionDTO)
         {
-            if (id != permission.PermissionId)
+            try
             {
-                return NotFound();
-            }
+                //if (id != permission.PermissionId)
+                //{
+                //    return NotFound();
+                //}
 
-            if (ModelState.IsValid)
-            {
-                try
+                if (ModelState.IsValid)
                 {
-                    _context.Update(permission);
-                    await _context.SaveChangesAsync();
+                    var sql = $"UPDATE [Permissions] SET CanView = '{customerPermissionDTO.CanView}', CanEdit = '{customerPermissionDTO.CanEdit}' WHERE PermissionId = {customerPermissionDTO.PermissionId}";
+                    await _context.Database.ExecuteSqlRawAsync(sql);
+
+                    return Redirect($"/Permissions/Index?userid=0&id={customerPermissionDTO.UserId}");
+
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!PermissionExists(permission.PermissionId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                ViewBag.ActivateLayout = 0;
+                return View(customerPermissionDTO);
             }
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "FirstName", permission.CustomerId);
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Password", permission.UserId);
-            return View(permission);
+            catch (Exception ex)
+            {
+                ViewBag.ActivateLayout = 2;
+                return View("Error", ex);
+            }
         }
 
         //// GET: Permissions/Delete/5

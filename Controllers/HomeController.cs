@@ -29,14 +29,22 @@ namespace Garage_Management.Controllers
             
             return View();
         }
-        public async Task<IActionResult> Privacy(int userid)
+        public async Task<IActionResult> Privacy(int userid, int?id)
         {
             try
             {
                 string sql;
                 if (userid == 0)
                 {
-                    sql = "SELECT * FROM [Users]";
+                    if(id == null)
+                    {
+sql = "SELECT * FROM [Users]";
+                    }
+                    else
+                    {
+                        sql = $"SELECT * FROM [Users] WHERE UserId= {id}";
+                    }
+                    
                 }
                 else
                 {
@@ -54,10 +62,10 @@ namespace Garage_Management.Controllers
                 ViewBag.ActivateLayout = 0;
                 return View(userDTOs);
             }
-            catch
+            catch(Exception ex) 
             {
                 ViewBag.ActivateLayout = 2;
-                return View("Error");
+                return View("Error",ex);
             }
 
         }

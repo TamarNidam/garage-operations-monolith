@@ -143,7 +143,7 @@ namespace Garage_Management.Controllers
 
                 if (garage != null)
                 {
-                    ViewData["OwnerId"] = garage.GarageName;
+                    ViewData["GarageId"] = garage.GarageName;
                 }
 
             }
@@ -157,7 +157,7 @@ namespace Garage_Management.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(int userid, int? id, [Bind("VisitId,CustomerId,CustomerName,GarageId,GarageName,VisitDate,ServiceDescription,TotalCost")] GarageVisitDTO garageVisitDTO)
+        public async Task<IActionResult> Create(int userid, int? id, [Bind("VisitId,CustomerId,CustomerName,GarageId,GarageName,VisitDate,ServiceDescription,TotalCost,CanEdit")] GarageVisitDTO garageVisitDTO)
         {
             try
             {
@@ -168,7 +168,7 @@ namespace Garage_Management.Controllers
                     var sql = $"INSERT INTO [GarageVisits] (VisitId,CustomerId,GarageId,VisitDate,ServiceDescription,TotalCost) VALUES ({newVisitId},{garageVisitDTO.CustomerId}, {garageVisitDTO.GarageId},'{garageVisitDTO.VisitDate}', '{garageVisitDTO.ServiceDescription}',{garageVisitDTO.TotalCost})";
                     await _context.Database.ExecuteSqlRawAsync(sql);
 
-                    return Redirect($"/GarageVisits/Index?userid={userid}");
+                    return Redirect($"/GarageVisits/Index?userid={userid}&id={garageVisitDTO.GarageId}");
                 }
                 ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "FirstName", garageVisitDTO.CustomerId);
                 ViewData["GarageId"] = new SelectList(_context.Garages, "GarageId", "GarageName", garageVisitDTO.GarageId);
