@@ -43,7 +43,7 @@ namespace Garage_Management.Controllers
                     }).Select(t => t.Result).ToList();
 
                 ViewBag.ActivateLayout = 0;
-                return View(permissionsDTOs);
+                 return View(permissionsDTOs);
             }
             catch (Exception ex)
             {
@@ -101,19 +101,37 @@ namespace Garage_Management.Controllers
         // GET: GaragePermissions/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
+            try
             {
-                return NotFound();
+                if (id == null)
+                {
+                    return NotFound();
+                }
+                var sql = $"SELECT * FROM [GaragePermissions] WHERE PermissionId = {id}";
+                var garagePermission = await _context.GaragePermissions.FromSqlRaw(sql).FirstOrDefaultAsync();
+                if (garagePermission == null)
+                {
+                    return NotFound();
+                }
+                var permission = new GaragePermissionDTO
+                {
+                    PermissionId = garagePermission.PermissionId,
+                    UserId = garagePermission.UserId,
+                    UserName = await _context.Users.FromSqlRaw(sql_user, garagePermission.UserId).Select(c => c.Username).FirstOrDefaultAsync(),
+                    GarageId = garagePermission.GarageId,
+                    GarageName = await _context.Garages.FromSqlRaw(sql_garage, garagePermission.GarageId).Select(c => c.GarageName).FirstOrDefaultAsync(),
+                    CanView = garagePermission.CanView,
+                    CanEdit = garagePermission.CanEdit
+                };
+                //ViewData["CAN"] = new SelectList(_context.Garages, "GarageId", "GarageName", garagePermission.GarageId);
+                ViewBag.ActivateLayout = 0;
+                return View(permission);
             }
-
-            var garagePermission = await _context.GaragePermissions.FindAsync(id);
-            if (garagePermission == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                ViewBag.ActivateLayout = 2;
+                return View("Error", ex);
             }
-            ViewData["GarageId"] = new SelectList(_context.Garages, "GarageId", "GarageName", garagePermission.GarageId);
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Password", garagePermission.UserId);
-            return View(garagePermission);
         }
 
         // POST: GaragePermissions/Edit/5
@@ -121,36 +139,31 @@ namespace Garage_Management.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("PermissionId,UserId,GarageId,CanView,CanEdit")] GaragePermission garagePermission)
+        public async Task<IActionResult> Edit(int userid, int id, [Bind("PermissionId,UserId,GarageId,CanView,CanEdit")] GaragePermissionDTO garagePermissionDTO)
         {
-            if (id != garagePermission.PermissionId)
+            try
             {
-                return NotFound();
-            }
+                //if (id != garagePermission.PermissionId)
+                //{
+                //    return NotFound();
+                //}
 
-            if (ModelState.IsValid)
-            {
-                try
+                if (ModelState.IsValid)
                 {
-                    _context.Update(garagePermission);
-                    await _context.SaveChangesAsync();
+                    var sql = $"UPDATE [GaragePermissions] SET CanView = '{garagePermissionDTO.CanView}', CanEdit = '{garagePermissionDTO.CanEdit}' WHERE PermissionId = {garagePermissionDTO.PermissionId}";
+                    await _context.Database.ExecuteSqlRawAsync(sql);
+
+                    return Redirect($"/GaragePermissions/Index?userid=0&id={garagePermissionDTO.UserId}");
+
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!GaragePermissionExists(garagePermission.PermissionId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                ViewBag.ActivateLayout = 0;
+                return View(garagePermissionDTO);
             }
-            ViewData["GarageId"] = new SelectList(_context.Garages, "GarageId", "GarageName", garagePermission.GarageId);
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Password", garagePermission.UserId);
-            return View(garagePermission);
+            catch(Exception ex)
+            {
+                ViewBag.ActivateLayout = 2;
+                return View("Error",ex);
+            }
         }
 
         //// GET: GaragePermissions/Delete/5

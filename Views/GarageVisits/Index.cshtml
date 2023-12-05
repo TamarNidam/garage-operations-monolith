@@ -10,7 +10,8 @@
 }
 
 <h1>Index</h1>
-@if (!string.IsNullOrEmpty(ViewBag.ifCanEdit))
+@if (id != null)
+//@if (!string.IsNullOrEmpty(ViewBag.ifCanEdit))
 {
     @if (ViewBag.ifCanEdit)
     {
@@ -70,19 +71,19 @@
                 @Html.DisplayFor(modelItem => item.GarageName)
             </td>
                 <td>
-                    @if (!string.IsNullOrEmpty(ViewBag.ifCanEdit))
+                    @if (id != null)
                     {
-                      @if (ViewBag.ifCanEdit )
-                    {
-                        <a asp-action="Edit" asp-route-userid="@userid" asp-route-id="@item.VisitId">Edit</a>
-                        <p></p>
-                        <a asp-action="Delete" asp-route-userid="@userid" asp-route-id="@item.VisitId">Delete</a>
-                        <p></p>
-                    }
+                        @if (ViewBag.ifCanEdit )
+                        {
+                            <a asp-action="Edit" asp-route-userid="@userid" asp-route-id="@item.VisitId">Edit</a>
+                            <p></p>
+                            <a asp-action="Delete" asp-route-userid="@userid" asp-route-id="@item.VisitId">Delete</a>
+                            <p></p>
+                        }
 
-                    @if (ViewBag.ifCanView )
-                    {
-                        <a asp-action="Details" asp-route-userid="@userid" asp-route-id="@item.VisitId">Details</a>
+                        @if (ViewBag.ifCanView )
+                        {
+                            <a asp-action="Details" asp-route-userid="@userid" asp-route-id="@item.VisitId">Details</a>
                         }
                     }
                     else

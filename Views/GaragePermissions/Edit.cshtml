@@ -1,7 +1,12 @@
-﻿@model Garage_Management.Models.GaragePermission
+﻿@model Garage_Management.DTO.GaragePermissionDTO
 
 @{
     ViewData["Title"] = "Edit";
+}
+@using Microsoft.AspNetCore.Http
+@{
+    int userid = Convert.ToInt32(Context.Request.Query["userid"]);
+    int? id = Convert.ToInt32(Context.Request.Query["id"]);
 }
 
 <h1>Edit</h1>
@@ -10,27 +15,34 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form asp-action="Edit" asp-route-userid="@userid" asp-route-id="@id">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="PermissionId" />
+            <input type="hidden" asp-for="UserId" />
             <div class="form-group">
-                <label asp-for="UserId" class="control-label"></label>
-                <select asp-for="UserId" class="form-control" asp-items="ViewBag.UserId"></select>
-                <span asp-validation-for="UserId" class="text-danger"></span>
+                <label asp-for="UserName" class="control-label"></label>
+                <input asp-for="UserName" class="form-control" readonly  />
+                <span asp-validation-for="UserName" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="GarageId" class="control-label"></label>
-                <select asp-for="GarageId" class="form-control" asp-items="ViewBag.GarageId"></select>
-                <span asp-validation-for="GarageId" class="text-danger"></span>
+                <label asp-for="GarageName" class="control-label"></label>
+                <input asp-for="GarageName" class="form-control" readonly />
+                <span asp-validation-for="GarageName" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="CanView" class="control-label"></label>
-                <input asp-for="CanView" class="form-control" />
+                <select asp-for="CanView" class="form-control">
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                </select>
                 <span asp-validation-for="CanView" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="CanEdit" class="control-label"></label>
-                <input asp-for="CanEdit" class="form-control" />
+                <select asp-for="CanEdit" class="form-control">
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                </select>
                 <span asp-validation-for="CanEdit" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -41,7 +53,7 @@
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index" asp-route-userid="@userid">Back to List</a>
 </div>
 
 @section Scripts {

@@ -14,6 +14,7 @@ namespace Garage_Management.Controllers
     {
         private const string sql_customer = "SELECT * FROM Customers WHERE CustomerId = {0}";
         private const string sql_garage = "SELECT * FROM Garage WHERE GarageId = {0}";
+        private const string sql_permission = "SELECT * FROM GaragePermissions WHERE UserId = {0} AND GarageId = {1}";
         private readonly Garage_ManagementContext _context;
 
         public GarageVisitsController(Garage_ManagementContext context)
@@ -48,7 +49,7 @@ namespace Garage_Management.Controllers
                         VisitDate = v.VisitDate,
                         ServiceDescription = v.ServiceDescription,
                         TotalCost = v.TotalCost
-
+                        //CanEdit = await _context.GaragePermissions.FromSqlRaw(sql_permission, userid, v.GarageId).Select(c => c.CanEdit).FirstOrDefaultAsync()
                     }).Select(t => t.Result).ToList();
                 if (id != null)
                 {
@@ -72,6 +73,11 @@ namespace Garage_Management.Controllers
                     {
                         ViewBag.ifCanView = false;
                     }
+                }
+                else
+                {
+                    ViewBag.ifCanView = false;
+                    ViewBag.ifCanEdit = false;
                 }
 
                 ViewBag.ActivateLayout = 0;
