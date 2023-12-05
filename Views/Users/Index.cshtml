@@ -51,7 +51,7 @@
                         <a asp-action="Edit" asp-route-userid="@userid" asp-route-id="@item.UserId">Edit</a>
                     } 
                    <p></p>
-                    <a asp-controller="Permissions" asp-action="index" asp-route-userid="@userid" asp-route-id="@item.UserId">Permissions</a>
+                    <a asp-controller="Home" asp-action="Privacy" asp-route-userid="@userid" asp-route-id="@item.UserId">Permissions</a>
                 </td>
             </tr>
         }
