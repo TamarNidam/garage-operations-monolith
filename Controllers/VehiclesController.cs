@@ -51,6 +51,7 @@ namespace Garage_Management.Controllers
                         OwnerId = v.OwnerId,
                         OwnerName = await _context.Customers.FromSqlRaw(sql_customer, v.OwnerId).Select(c => c.FirstName).FirstOrDefaultAsync()
                     }).Select(t => t.Result).ToList();
+
                 if (id == null)
                 {
                     ViewBag.ifCanEdit = false;
@@ -120,6 +121,7 @@ namespace Garage_Management.Controllers
                     OwnerId = vehicle.OwnerId,
                     OwnerName = await _context.Customers.FromSqlRaw(sql_customer, vehicle.OwnerId).Select(c => c.FirstName).FirstOrDefaultAsync()
                 };
+
                 ViewBag.ActivateLayout = 0;
                 return View(vehicleDTO);
             }
